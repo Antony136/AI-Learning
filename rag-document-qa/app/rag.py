@@ -9,25 +9,25 @@ RERANK_THRESHOLD = 1.0
 
 def answer_question(
     question: str,
+    document_id: int,
     retrieval_top_k: int = 10,
     final_top_n: int = 5,
     max_distance: float = 0.50
 ):
-    # Stage 1: Vector retrieval
     results = retrieve(
         question,
         top_k=retrieval_top_k,
-        max_distance=max_distance
+        max_distance=max_distance,
+        document_id=document_id
     )
 
     if not results:
         return (
             "I could not find relevant information "
-            "in the document.",
+            "in the selected document.",
             []
         )
 
-    # Stage 2: Cross-encoder reranking
     reranked_results = rerank(
         question,
         results,
@@ -37,27 +37,23 @@ def answer_question(
     if not reranked_results:
         return (
             "I could not find relevant information "
-            "in the document.",
+            "in the selected document.",
             []
         )
 
-    # Stage 3: Check whether the best result
-    # is relevant enough to answer the question.
     best_score = reranked_results[0]["rerank_score"]
 
     if best_score < RERANK_THRESHOLD:
         return (
             "I could not find relevant information "
-            "in the document.",
+            "in the selected document.",
             []
         )
 
-    # Stage 4: Build context
     context = build_context(
         reranked_results
     )
 
-    # Stage 5: Generate grounded answer
     answer = generate_answer(
         question,
         context
@@ -68,10 +64,17 @@ def answer_question(
 
 if __name__ == "__main__":
 
-    question = input("Question: ")
+    document_id = int(
+        input("Document ID: ")
+    )
+
+    question = input(
+        "Question: "
+    )
 
     answer, results = answer_question(
-        question
+        question=question,
+        document_id=document_id
     )
 
     print("\nAnswer:")
@@ -84,6 +87,7 @@ if __name__ == "__main__":
         print("=" * 70)
 
         for result in results:
+
             print(
                 f"- {result['source']} "
                 f"| Page {result['page']} "
