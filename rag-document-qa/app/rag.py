@@ -84,11 +84,8 @@ if __name__ == "__main__":
         print("=" * 70)
 
         for result in results:
-
             print(
                 f"- {result['source']} "
-                f"(Page {result['page']}, "
-                f"Chunk {result['chunk_index']}) "
-                f"[Rerank score: "
-                f"{result['rerank_score']:.4f}]"
+                f"| Page {result['page']} "
+                f"| Chunk {result['chunk_index']}"
             )
