@@ -1,21 +1,48 @@
+import re
+
+
+def split_into_sentences(text: str):
+    sentences = re.split(
+        r"(?<=[.!?])\s+",
+        text
+    )
+
+    return [
+        sentence.strip()
+        for sentence in sentences
+        if sentence.strip()
+    ]
+
+
 def chunk_text(
     text: str,
     chunk_size: int = 1000,
-    overlap: int = 200
+    overlap_sentences: int = 1
 ):
+    sentences = split_into_sentences(text)
+
     chunks = []
+    current_sentences = []
 
-    start = 0
+    for sentence in sentences:
+        current_text = " ".join(current_sentences)
 
-    while start < len(text):
+        if (
+            current_sentences
+            and len(current_text) + len(sentence) + 1 > chunk_size
+        ):
+            chunks.append(current_text)
 
-        end = start + chunk_size
+            overlap = current_sentences[-overlap_sentences:]
 
-        chunk = text[start:end].strip()
+            current_sentences = overlap + [sentence]
 
-        if chunk:
-            chunks.append(chunk)
+        else:
+            current_sentences.append(sentence)
 
-        start += chunk_size - overlap
+    if current_sentences:
+        chunks.append(
+            " ".join(current_sentences)
+        )
 
     return chunks
