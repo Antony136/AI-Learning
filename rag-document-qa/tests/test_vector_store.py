@@ -1,6 +1,6 @@
 from ollama import embed
 
-from vector_store import VectorStore
+from app.retrieval.vector_store import VectorStore
 
 
 EMBEDDING_MODEL = "nomic-embed-text"
