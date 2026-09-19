@@ -1,4 +1,8 @@
-def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200):
+def chunk_text(
+    text: str,
+    chunk_size: int = 1000,
+    overlap: int = 200
+):
     chunks = []
 
     start = 0
@@ -7,9 +11,10 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200):
 
         end = start + chunk_size
 
-        chunk = text[start:end]
+        chunk = text[start:end].strip()
 
-        chunks.append(chunk)
+        if chunk:
+            chunks.append(chunk)
 
         start += chunk_size - overlap
 

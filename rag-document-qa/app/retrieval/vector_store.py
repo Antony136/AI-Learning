@@ -1,54 +1,53 @@
-import math
+from app.core.database import get_connection
 
 
-class VectorStore:
+def search_similar_chunks(
+    query_embedding: list[float],
+    top_k: int = 5
+):
 
-    def __init__(self):
-        self.documents = []
+    connection = get_connection()
 
-    def add(self, text, embedding):
-        self.documents.append({
-            "text": text,
-            "embedding": embedding
-        })
+    try:
 
-    def similarity(self, vector_a, vector_b):
-        dot_product = sum(
-            a * b for a, b in zip(vector_a, vector_b)
-        )
+        with connection.cursor() as cursor:
 
-        magnitude_a = math.sqrt(
-            sum(a * a for a in vector_a)
-        )
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    source,
+                    page,
+                    chunk_index,
+                    content,
+                    embedding <=> %s::vector AS distance
+                FROM document_chunks
+                ORDER BY embedding <=> %s::vector
+                LIMIT %s
+                """,
+                (
+                    query_embedding,
+                    query_embedding,
+                    top_k
+                )
+            )
 
-        magnitude_b = math.sqrt(
-            sum(b * b for b in vector_b)
-        )
-
-        if magnitude_a == 0 or magnitude_b == 0:
-            return 0
-
-        return dot_product / (magnitude_a * magnitude_b)
-
-    def search(self, query_embedding, top_k=3):
+            rows = cursor.fetchall()
 
         results = []
 
-        for document in self.documents:
-
-            score = self.similarity(
-                query_embedding,
-                document["embedding"]
-            )
+        for row in rows:
 
             results.append({
-                "text": document["text"],
-                "score": score
+                "id": row[0],
+                "source": row[1],
+                "page": row[2],
+                "chunk_index": row[3],
+                "content": row[4],
+                "distance": row[5]
             })
 
-        results.sort(
-            key=lambda item: item["score"],
-            reverse=True
-        )
+        return results
 
-        return results[:top_k]
+    finally:
+        connection.close()

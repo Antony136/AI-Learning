@@ -1,38 +1,19 @@
 from pypdf import PdfReader
 
-from chunker import chunk_text
 
+def extract_pages(pdf_path: str):
+    reader = PdfReader(pdf_path)
 
-pdf_path = "documents/genai-notes.pdf"
+    pages = []
 
+    for page_number, page in enumerate(reader.pages, start=1):
 
-reader = PdfReader(pdf_path)
+        text = page.extract_text()
 
-full_text = ""
+        if text:
+            pages.append({
+                "page": page_number,
+                "text": text
+            })
 
-for page in reader.pages:
-
-    text = page.extract_text()
-
-    if text:
-        full_text += text + "\n"
-
-
-chunks = chunk_text(
-    full_text,
-    chunk_size=1000,
-    overlap=200
-)
-
-
-print("Total characters:", len(full_text))
-print("Number of chunks:", len(chunks))
-
-
-for index, chunk in enumerate(chunks, start=1):
-
-    print("\n" + "=" * 60)
-    print(f"CHUNK {index}")
-    print("=" * 60)
-
-    print(chunk)
+    return pages

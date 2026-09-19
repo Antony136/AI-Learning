@@ -1,21 +1,13 @@
 from ollama import embed
 
 
-text = "RAG retrieves relevant information before generating an answer."
+EMBEDDING_MODEL = "nomic-embed-text"
 
 
-response = embed(
-    model="nomic-embed-text",
-    input=text
-)
+def generate_embedding(text: str):
+    response = embed(
+        model=EMBEDDING_MODEL,
+        input=text
+    )
 
-vector = response.embeddings[0]
-
-print("Text:")
-print(text)
-
-print("\nVector dimension:")
-print(len(vector))
-
-print("\nFirst 10 values:")
-print(vector[:10])
+    return response.embeddings[0]

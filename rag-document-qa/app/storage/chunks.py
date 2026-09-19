@@ -33,3 +33,20 @@ def insert_chunk(
 
     finally:
         connection.close()
+
+
+def clear_chunks():
+
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                "DELETE FROM document_chunks"
+            )
+
+        connection.commit()
+
+    finally:
+        connection.close()
