@@ -8,13 +8,17 @@ from app.ingestion.pipeline import ingest_document
 from app.rag import answer_question
 
 
-router = APIRouter(prefix="/documents", tags=["Documents"])
+router = APIRouter(
+    prefix="/documents",
+    tags=["Documents"]
+)
 
 DOCUMENTS_DIR = Path("documents")
 
 
 class QuestionRequest(BaseModel):
     question: str
+    document_ids: list[int] | None = None
 
 
 @router.get("")
@@ -23,7 +27,9 @@ def list_documents():
 
 
 @router.post("/upload")
-async def upload_document(file: UploadFile = File(...)):
+async def upload_document(
+    file: UploadFile = File(...)
+):
 
     if not file.filename:
         raise HTTPException(
@@ -71,61 +77,8 @@ async def upload_document(file: UploadFile = File(...)):
         )
 
 
-@router.post("/{document_id}/ask")
-def ask_document_question(
-    document_id: int,
-    request: QuestionRequest
-):
-
-    if not request.question.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Question cannot be empty"
-        )
-
-    document = get_document(
-        document_id
-    )
-
-    if document is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Document {document_id} not found"
-        )
-
-    try:
-
-        answer, results = answer_question(
-            question=request.question,
-            document_id=document_id
-        )
-
-        sources = [
-            {
-                "source": result["source"],
-                "page": result["page"],
-                "chunk": result["chunk_index"]
-            }
-            for result in results
-        ]
-
-        return {
-            "document_id": document_id,
-            "question": request.question,
-            "answer": answer,
-            "sources": sources
-        }
-
-    except Exception as error:
-
-        raise HTTPException(
-            status_code=500,
-            detail=str(error)
-        )
-
-
 @router.post("/ask")
-def ask_all_documents(
+def ask_documents(
     request: QuestionRequest
 ):
 
@@ -135,11 +88,35 @@ def ask_all_documents(
             detail="Question cannot be empty"
         )
 
+    if request.document_ids is not None:
+
+        if not request.document_ids:
+            raise HTTPException(
+                status_code=400,
+                detail="document_ids cannot be empty"
+            )
+
+        documents = []
+
+        for document_id in request.document_ids:
+
+            document = get_document(
+                document_id
+            )
+
+            if document is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Document {document_id} not found"
+                )
+
+            documents.append(document)
+
     try:
 
         answer, results = answer_question(
             question=request.question,
-            document_id=None
+            document_ids=request.document_ids
         )
 
         sources = [
@@ -154,6 +131,7 @@ def ask_all_documents(
 
         return {
             "question": request.question,
+            "document_ids": request.document_ids,
             "answer": answer,
             "sources": sources
         }
