@@ -1,26 +1,14 @@
 from pathlib import Path
 
-from fastapi import (
-    APIRouter,
-    File,
-    UploadFile,
-    HTTPException
-)
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
 
-from app.storage.documents import (
-    get_documents,
-    get_document
-)
+from app.storage.documents import get_documents, get_document
 from app.ingestion.pipeline import ingest_document
 from app.rag import answer_question
 
 
-router = APIRouter(
-    prefix="/documents",
-    tags=["Documents"]
-)
-
+router = APIRouter(prefix="/documents", tags=["Documents"])
 
 DOCUMENTS_DIR = Path("documents")
 
@@ -35,9 +23,8 @@ def list_documents():
 
 
 @router.post("/upload")
-async def upload_document(
-    file: UploadFile = File(...)
-):
+async def upload_document(file: UploadFile = File(...)):
+
     if not file.filename:
         raise HTTPException(
             status_code=400,
@@ -58,6 +45,7 @@ async def upload_document(
     file_path = DOCUMENTS_DIR / file.filename
 
     try:
+
         contents = await file.read()
 
         with open(file_path, "wb") as output_file:
@@ -84,10 +72,11 @@ async def upload_document(
 
 
 @router.post("/{document_id}/ask")
-def ask_question(
+def ask_document_question(
     document_id: int,
     request: QuestionRequest
 ):
+
     if not request.question.strip():
         raise HTTPException(
             status_code=400,
@@ -105,6 +94,7 @@ def ask_question(
         )
 
     try:
+
         answer, results = answer_question(
             question=request.question,
             document_id=document_id
@@ -121,6 +111,48 @@ def ask_question(
 
         return {
             "document_id": document_id,
+            "question": request.question,
+            "answer": answer,
+            "sources": sources
+        }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
+
+
+@router.post("/ask")
+def ask_all_documents(
+    request: QuestionRequest
+):
+
+    if not request.question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
+
+    try:
+
+        answer, results = answer_question(
+            question=request.question,
+            document_id=None
+        )
+
+        sources = [
+            {
+                "document_id": result["document_id"],
+                "source": result["source"],
+                "page": result["page"],
+                "chunk": result["chunk_index"]
+            }
+            for result in results
+        ]
+
+        return {
             "question": request.question,
             "answer": answer,
             "sources": sources

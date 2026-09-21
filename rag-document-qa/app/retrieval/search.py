@@ -3,22 +3,19 @@ from app.retrieval.vector_store import search_similar_chunks
 
 
 def retrieve(
-    question: str,
-    top_k: int = 5,
-    max_distance: float = 0.50,
-    document_id: int | None = None
+    question,
+    top_k=5,
+    max_distance=0.50,
+    document_ids=None
 ):
-    query_embedding = generate_embedding(
-        question
-    )
+    query_embedding = generate_embedding(question)
 
     return search_similar_chunks(
-        query_embedding,
+        query_embedding=query_embedding,
         top_k=top_k,
         max_distance=max_distance,
-        document_id=document_id
+        document_ids=document_ids
     )
-
 
 if __name__ == "__main__":
 
