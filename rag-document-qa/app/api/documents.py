@@ -142,3 +142,47 @@ def ask_documents(
             status_code=500,
             detail=str(error)
         )
+
+@router.delete("/{document_id}")
+def delete_document(document_id: int):
+
+    document = get_document(document_id)
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document {document_id} not found"
+        )
+
+    from app.core.database import get_connection
+
+    connection = get_connection()
+
+    try:
+
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                DELETE FROM documents
+                WHERE id = %s
+                """,
+                (document_id,)
+            )
+
+        connection.commit()
+
+    except Exception:
+
+        connection.rollback()
+        raise
+
+    finally:
+
+        connection.close()
+
+    return {
+        "message": "Document deleted successfully",
+        "document_id": document_id,
+        "filename": document["filename"]
+    }
