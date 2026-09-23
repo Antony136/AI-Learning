@@ -4,7 +4,8 @@ from app.generation.prompts import build_context
 from app.generation.llm import generate_answer
 from app.retrieval.query_correction import correct_query
 from app.retrieval.vocabulary import get_document_vocabulary
-
+from app.retrieval.query_rewrite import rewrite_question
+from app.retrieval.query_normalization import normalize_query
 
 RERANK_THRESHOLD = 1.0
 CORRECTION_MARGIN = 2.0
@@ -100,8 +101,35 @@ def answer_question(
     document_ids: list[int] | None = None,
     retrieval_top_k: int = 10,
     final_top_n: int = 5,
-    max_distance: float = 0.50
+    max_distance: float = 0.50,
+    conversation: list[dict] | None = None
 ):
+    if conversation is None:
+        conversation = []
+
+    original_question = question
+
+    question = normalize_query(question)
+
+    if question != original_question:
+        print("\n" + "=" * 70)
+        print("QUERY NORMALIZATION")
+        print("=" * 70)
+        print("Original:   ", original_question)
+        print("Normalized: ", question)
+        
+    question = rewrite_question(
+        question,
+        conversation
+    )
+
+    if question != original_question:
+        print("\n" + "=" * 70)
+        print("QUERY REWRITE")
+        print("=" * 70)
+        print(f"Original:   {original_question}")
+        print(f"Rewritten:  {question}")
+
     question = improve_query(
         question=question,
         document_ids=document_ids,
@@ -138,9 +166,7 @@ def answer_question(
         results,
         start=1
     ):
-        print(
-            f"\nResult {index}"
-        )
+        print(f"\nResult {index}")
 
         print(
             f"Document ID: "
@@ -176,9 +202,7 @@ def answer_question(
         reranked_results,
         start=1
     ):
-        print(
-            f"\nResult {index}"
-        )
+        print(f"\nResult {index}")
 
         print(
             f"Document ID: "
@@ -273,7 +297,8 @@ if __name__ == "__main__":
 
     answer, results = answer_question(
         question=question,
-        document_ids=document_ids
+        document_ids=document_ids,
+        conversation=[]
     )
 
     print("\nAnswer:")
@@ -281,12 +306,10 @@ if __name__ == "__main__":
     print(answer)
 
     if results:
-
         print("\nSources:")
         print("=" * 70)
 
         for result in results:
-
             print(
                 f"- Document {result['document_id']} "
                 f"| {result['source']} "

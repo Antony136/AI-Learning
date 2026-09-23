@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.storage.documents import get_documents, get_document
 from app.ingestion.pipeline import ingest_document
 from app.rag import answer_question
+from app.generation.sources import build_sources
 
 
 router = APIRouter(
@@ -16,9 +17,15 @@ router = APIRouter(
 DOCUMENTS_DIR = Path("documents")
 
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
 class QuestionRequest(BaseModel):
     question: str
     document_ids: list[int] | None = None
+    conversation: list[ChatMessage] = []
 
 
 @router.get("")
@@ -96,8 +103,6 @@ def ask_documents(
                 detail="document_ids cannot be empty"
             )
 
-        documents = []
-
         for document_id in request.document_ids:
 
             document = get_document(
@@ -110,24 +115,15 @@ def ask_documents(
                     detail=f"Document {document_id} not found"
                 )
 
-            documents.append(document)
-
     try:
 
         answer, results = answer_question(
             question=request.question,
-            document_ids=request.document_ids
+            document_ids=request.document_ids,
+            conversation=request.conversation
         )
 
-        sources = [
-            {
-                "document_id": result["document_id"],
-                "source": result["source"],
-                "page": result["page"],
-                "chunk": result["chunk_index"]
-            }
-            for result in results
-        ]
+        sources = build_sources(results)
 
         return {
             "question": request.question,
@@ -142,6 +138,7 @@ def ask_documents(
             status_code=500,
             detail=str(error)
         )
+
 
 @router.delete("/{document_id}")
 def delete_document(document_id: int):

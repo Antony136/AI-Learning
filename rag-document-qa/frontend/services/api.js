@@ -64,28 +64,26 @@ export async function deleteDocument(documentId) {
 
 export async function askQuestion(
   question,
-  documentIds = null
+  documentIds = null,
+  conversation = []
 ) {
-  const response = await fetch(
-    `${API_URL}/documents/ask`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question,
-        document_ids: documentIds
-      })
-    }
-  );
+  const response = await fetch(`${API_URL}/documents/ask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      question,
+      document_ids: documentIds,
+      conversation
+    })
+  });
 
   const data = await response.json();
 
   if (!response.ok) {
     throw new Error(
-      data.detail ||
-      `Request failed (${response.status})`
+      data.detail || `Request failed (${response.status})`
     );
   }
 

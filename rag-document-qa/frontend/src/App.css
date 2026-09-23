@@ -951,3 +951,14 @@ textarea:disabled {
   background: #fef2f2;
   border-color: #fca5a5;
 }
+
+.source-snippet {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
+}

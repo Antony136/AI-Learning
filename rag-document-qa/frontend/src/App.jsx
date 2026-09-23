@@ -17,45 +17,26 @@ import {
 
 
 function App() {
-
-  const [documents, setDocuments] =
-    useState([]);
-
-  const [selectedDocuments, setSelectedDocuments] =
-    useState([]);
-
-  const [question, setQuestion] =
-    useState("");
-
-  const [answer, setAnswer] =
-    useState("");
-
-  const [sources, setSources] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [loadingDocuments, setLoadingDocuments] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState([]);
+  const [conversation, setConversation] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingDocuments, setLoadingDocuments] = useState(true);
+  const [error, setError] = useState("");
 
 
   /*
    * Load documents from backend.
    */
   async function loadDocuments() {
-
     setLoadingDocuments(true);
-
     setError("");
 
     try {
-
-      const data =
-        await getDocuments();
+      const data = await getDocuments();
 
       setDocuments(data);
 
@@ -63,30 +44,22 @@ function App() {
        * Keep only selected documents
        * that still exist.
        */
-      setSelectedDocuments(
-        (currentSelection) =>
-          currentSelection.filter(
-            (id) =>
-              data.some(
-                (document) =>
-                  document.id === id
-              )
+      setSelectedDocuments((currentSelection) =>
+        currentSelection.filter((id) =>
+          data.some(
+            (document) => document.id === id
           )
+        )
       );
-
     } catch (error) {
-
       console.error(error);
 
       setError(
         error.message ||
         "Could not load documents."
       );
-
     } finally {
-
       setLoadingDocuments(false);
-
     }
   }
 
@@ -95,9 +68,7 @@ function App() {
    * Load documents when the application starts.
    */
   useEffect(() => {
-
     loadDocuments();
-
   }, []);
 
 
@@ -105,28 +76,15 @@ function App() {
    * Select or deselect a document.
    */
   function toggleDocument(documentId) {
-
-    setSelectedDocuments(
-      (current) => {
-
-        if (
-          current.includes(documentId)
-        ) {
-
-          return current.filter(
-            (id) =>
-              id !== documentId
-          );
-
-        }
-
-        return [
-          ...current,
-          documentId
-        ];
-
+    setSelectedDocuments((current) => {
+      if (current.includes(documentId)) {
+        return current.filter(
+          (id) => id !== documentId
+        );
       }
-    );
+
+      return [...current, documentId];
+    });
   }
 
 
@@ -134,9 +92,7 @@ function App() {
    * Clear all selected documents.
    */
   function clearSelection() {
-
     setSelectedDocuments([]);
-
   }
 
 
@@ -144,18 +100,12 @@ function App() {
    * Remove a document from the
    * selected documents.
    */
-  function removeFromSelection(
-    documentId
-  ) {
-
-    setSelectedDocuments(
-      (current) =>
-        current.filter(
-          (id) =>
-            id !== documentId
-        )
+  function removeFromSelection(documentId) {
+    setSelectedDocuments((current) =>
+      current.filter(
+        (id) => id !== documentId
+      )
     );
-
   }
 
 
@@ -163,142 +113,109 @@ function App() {
    * Ask a question.
    */
   async function handleAskQuestion() {
-
     if (!question.trim()) {
       return;
     }
 
+    const currentQuestion = question.trim();
+
     setLoading(true);
-
     setError("");
-
     setAnswer("");
-
     setSources([]);
 
-
     try {
-
-      const data =
-        await askQuestion(
-          question.trim(),
-          selectedDocuments.length > 0
-            ? selectedDocuments
-            : null
-        );
-
-
-      setAnswer(
-        data.answer
+      const data = await askQuestion(
+        currentQuestion,
+        selectedDocuments.length > 0
+          ? selectedDocuments
+          : null,
+        conversation
       );
 
-      setSources(
-        data.sources || []
-      );
+      setAnswer(data.answer);
+      setSources(data.sources || []);
 
+      /*
+       * Add the latest question and answer
+       * to the conversation history.
+       */
+      setConversation((currentConversation) => [
+        ...currentConversation,
+        {
+          role: "user",
+          content: currentQuestion
+        },
+        {
+          role: "assistant",
+          content: data.answer
+        }
+      ]);
     } catch (error) {
-
       console.error(error);
 
       setError(
         error.message ||
         "Something went wrong while asking the question."
       );
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
 
   /*
-   * Clear the current answer.
+   * Clear the current answer and
+   * start a new conversation.
    */
   function clearAnswer() {
-
     setAnswer("");
-
     setSources([]);
-
+    setConversation([]);
     setError("");
-
   }
 
 
   return (
-
     <div className="app">
-
       <Header />
 
-
       <main className="container">
-
         <UploadDocument
-          onUploadSuccess={
-            loadDocuments
-          }
+          onUploadSuccess={loadDocuments}
           setError={setError}
         />
-
 
         <DocumentList
           documents={documents}
-          selectedDocuments={
-            selectedDocuments
-          }
-          onToggleDocument={
-            toggleDocument
-          }
-          onClearSelection={
-            clearSelection
-          }
-          onDocumentsChange={
-            loadDocuments
-          }
-          onRemoveFromSelection={
-            removeFromSelection
-          }
+          selectedDocuments={selectedDocuments}
+          onToggleDocument={toggleDocument}
+          onClearSelection={clearSelection}
+          onDocumentsChange={loadDocuments}
+          onRemoveFromSelection={removeFromSelection}
           setError={setError}
-          loading={
-            loadingDocuments
-          }
+          loading={loadingDocuments}
         />
-
 
         <QuestionBox
           question={question}
           setQuestion={setQuestion}
-          onAskQuestion={
-            handleAskQuestion
-          }
+          onAskQuestion={handleAskQuestion}
           loading={loading}
-          selectedDocuments={
-            selectedDocuments
-          }
+          selectedDocuments={selectedDocuments}
         />
 
-
-        <ErrorMessage
-          error={error}
-        />
-
+        <ErrorMessage error={error} />
 
         <AnswerCard
           answer={answer}
           sources={sources}
           onClear={clearAnswer}
         />
-
       </main>
 
-
       <Footer />
-
     </div>
-
   );
 }
 
