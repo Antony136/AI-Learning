@@ -6,10 +6,12 @@ from app.retrieval.query_correction import correct_query
 from app.retrieval.vocabulary import get_document_vocabulary
 from app.retrieval.query_rewrite import rewrite_question
 from app.retrieval.query_normalization import normalize_query
+from app.retrieval.multi_query import multi_query_retrieve
 
 RERANK_THRESHOLD = 1.0
 CORRECTION_MARGIN = 2.0
-
+MULTI_QUERY_COUNT = 3
+MULTI_QUERY_TOP_K = 5
 
 def improve_query(
     question: str,
@@ -96,6 +98,7 @@ def improve_query(
     return question
 
 
+
 def answer_question(
     question: str,
     document_ids: list[int] | None = None,
@@ -109,6 +112,10 @@ def answer_question(
 
     original_question = question
 
+    # --------------------------------------------------
+    # 1. QUERY NORMALIZATION
+    # --------------------------------------------------
+
     question = normalize_query(question)
 
     if question != original_question:
@@ -117,18 +124,28 @@ def answer_question(
         print("=" * 70)
         print("Original:   ", original_question)
         print("Normalized: ", question)
-        
-    question = rewrite_question(
+
+    # --------------------------------------------------
+    # 2. CONVERSATION-AWARE QUERY REWRITE
+    # --------------------------------------------------
+
+    rewritten_question = rewrite_question(
         question,
         conversation
     )
 
-    if question != original_question:
+    if rewritten_question != question:
         print("\n" + "=" * 70)
         print("QUERY REWRITE")
         print("=" * 70)
-        print(f"Original:   {original_question}")
-        print(f"Rewritten:  {question}")
+        print("Original:   ", question)
+        print("Rewritten:  ", rewritten_question)
+
+    question = rewritten_question
+
+    # --------------------------------------------------
+    # 3. QUERY CORRECTION
+    # --------------------------------------------------
 
     question = improve_query(
         question=question,
@@ -137,15 +154,23 @@ def answer_question(
         final_top_n=final_top_n,
     )
 
-    results = retrieve(
-        question,
-        top_k=retrieval_top_k,
+    # --------------------------------------------------
+    # 4. MULTI-QUERY RETRIEVAL
+    # --------------------------------------------------
+
+    multi_query_count = 3
+    multi_query_top_k = 5
+
+    results = multi_query_retrieve(
+        question=question,
+        num_queries=multi_query_count,
+        top_k_per_query=multi_query_top_k,
         max_distance=max_distance,
         document_ids=document_ids
     )
 
     print("\n" + "=" * 70)
-    print("VECTOR SEARCH RESULTS")
+    print("MULTI-QUERY VECTOR SEARCH RESULTS")
     print("=" * 70)
 
     if not results:
@@ -179,6 +204,11 @@ def answer_question(
         )
 
         print(
+            f"RRF score: "
+            f"{result['rrf_score']:.6f}"
+        )
+
+        print(
             f"Page: "
             f"{result['page']}"
         )
@@ -187,6 +217,10 @@ def answer_question(
             f"Chunk: "
             f"{result['chunk_index']}"
         )
+
+    # --------------------------------------------------
+    # 5. CROSS-ENCODER RERANKING
+    # --------------------------------------------------
 
     reranked_results = rerank(
         question,
@@ -220,6 +254,11 @@ def answer_question(
         )
 
         print(
+            f"RRF score: "
+            f"{result['rrf_score']:.6f}"
+        )
+
+        print(
             f"Page: "
             f"{result['page']}"
         )
@@ -235,6 +274,10 @@ def answer_question(
             "in the selected documents.",
             []
         )
+
+    # --------------------------------------------------
+    # 6. RERANK THRESHOLD
+    # --------------------------------------------------
 
     best_score = reranked_results[0]["rerank_score"]
 
@@ -265,9 +308,17 @@ def answer_question(
             []
         )
 
+    # --------------------------------------------------
+    # 7. BUILD CONTEXT
+    # --------------------------------------------------
+
     context = build_context(
         reranked_results
     )
+
+    # --------------------------------------------------
+    # 8. GENERATE ANSWER
+    # --------------------------------------------------
 
     answer = generate_answer(
         question,
@@ -275,7 +326,6 @@ def answer_question(
     )
 
     return answer, reranked_results
-
 
 if __name__ == "__main__":
 

@@ -1,5 +1,7 @@
 .app {
   min-height: 100vh;
+  background: #0f1117;
+  color: #e5e7eb;
 }
 
 
@@ -8,8 +10,8 @@
 ========================= */
 
 .header {
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: #151821;
+  border-bottom: 1px solid #272b35;
 }
 
 
@@ -37,7 +39,7 @@
 
   border-radius: 12px;
 
-  background: #172033;
+  background: #6366f1;
   color: white;
 
   font-size: 21px;
@@ -51,14 +53,14 @@
   font-size: 25px;
   font-weight: 700;
 
-  color: #172033;
+  color: #f9fafb;
 }
 
 
 .header p {
   margin: 5px 0 0;
 
-  color: #667085;
+  color: #9ca3af;
   font-size: 14px;
 }
 
@@ -84,15 +86,15 @@
 ========================= */
 
 .card {
-  background: #ffffff;
+  background: #171a21;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid #292e38;
   border-radius: 14px;
 
   padding: 26px;
 
   box-shadow:
-    0 2px 6px rgba(16, 24, 40, 0.03);
+    0 8px 30px rgba(0, 0, 0, 0.18);
 }
 
 
@@ -118,14 +120,14 @@
   font-size: 19px;
   font-weight: 650;
 
-  color: #172033;
+  color: #f3f4f6;
 }
 
 
 .section-description {
   margin: 5px 0 0;
 
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 14px;
   line-height: 1.5;
@@ -149,9 +151,9 @@
 
   border-radius: 20px;
 
-  background: #f2f4f7;
+  background: #252a34;
 
-  color: #475467;
+  color: #cbd5e1;
 
   font-size: 13px;
   font-weight: 500;
@@ -163,7 +165,7 @@
 
   background: transparent;
 
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 13px;
 
@@ -174,7 +176,7 @@
 
 
 .clear-button:hover {
-  color: #172033;
+  color: #f3f4f6;
 }
 
 
@@ -201,11 +203,13 @@
 
   padding: 15px;
 
-  border: 1px solid #e4e7ec;
+  border: 1px solid #303642;
 
   border-radius: 11px;
 
   cursor: pointer;
+
+  background: #12151c;
 
   transition:
     border-color 0.15s ease,
@@ -214,13 +218,13 @@
 
 
 .document-card:hover {
-  background: #f9fafb;
+  background: #191d26;
 }
 
 
 .document-card.selected {
-  border-color: #98a2b3;
-  background: #f8fafc;
+  border-color: #6366f1;
+  background: #1a1d2a;
 }
 
 
@@ -249,9 +253,9 @@
 
   border-radius: 9px;
 
-  background: #f2f4f7;
+  background: #252a34;
 
-  color: #475467;
+  color: #a5b4fc;
 
   font-size: 10px;
   font-weight: 700;
@@ -270,7 +274,7 @@
 
 
 .document-info strong {
-  color: #172033;
+  color: #f3f4f6;
 
   font-size: 14px;
 
@@ -283,7 +287,7 @@
 
 
 .document-info span {
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 12px;
 }
@@ -301,7 +305,7 @@
 
   border-radius: 50%;
 
-  color: #172033;
+  color: #a5b4fc;
 
   font-size: 14px;
   font-weight: 700;
@@ -317,7 +321,7 @@
 
   padding: 40px 20px;
 
-  border: 1px dashed #d0d5dd;
+  border: 1px dashed #3b4250;
 
   border-radius: 10px;
 }
@@ -335,14 +339,14 @@
 
   font-size: 15px;
 
-  color: #344054;
+  color: #e5e7eb;
 }
 
 
 .empty-state p {
   margin: 0;
 
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 13px;
 }
@@ -361,15 +365,15 @@ textarea {
 
   padding: 15px;
 
-  border: 1px solid #d0d5dd;
+  border: 1px solid #303642;
 
   border-radius: 10px;
 
   outline: none;
 
-  background: #ffffff;
+  background: #10131a;
 
-  color: #172033;
+  color: #e5e7eb;
 
   font-size: 14px;
 
@@ -382,20 +386,20 @@ textarea {
 
 
 textarea::placeholder {
-  color: #98a2b3;
+  color: #6b7280;
 }
 
 
 textarea:focus {
-  border-color: #667085;
+  border-color: #6366f1;
 
   box-shadow:
-    0 0 0 3px rgba(102, 112, 133, 0.08);
+    0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 
 textarea:disabled {
-  background: #f9fafb;
+  background: #181b23;
 
   cursor: not-allowed;
 }
@@ -419,7 +423,7 @@ textarea:disabled {
 
 
 .selection-hint {
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 13px;
 }
@@ -445,7 +449,7 @@ textarea:disabled {
 
   border-radius: 9px;
 
-  background: #172033;
+  background: #6366f1;
 
   color: #ffffff;
 
@@ -455,13 +459,13 @@ textarea:disabled {
   cursor: pointer;
 
   transition:
-    opacity 0.15s ease,
+    background 0.15s ease,
     transform 0.1s ease;
 }
 
 
 .ask-button:hover:not(:disabled) {
-  opacity: 0.9;
+  background: #5558e8;
 }
 
 
@@ -496,11 +500,9 @@ textarea:disabled {
 
 
 @keyframes spin {
-
   to {
     transform: rotate(360deg);
   }
-
 }
 
 
@@ -515,11 +517,11 @@ textarea:disabled {
 
   padding: 16px;
 
-  border: 1px solid #fecdca;
+  border: 1px solid #7f1d1d;
 
   border-radius: 10px;
 
-  background: #fffbfa;
+  background: #2a171a;
 }
 
 
@@ -535,9 +537,9 @@ textarea:disabled {
 
   border-radius: 50%;
 
-  background: #fee4e2;
+  background: #451a1a;
 
-  color: #b42318;
+  color: #fca5a5;
 
   font-size: 13px;
   font-weight: 700;
@@ -545,7 +547,7 @@ textarea:disabled {
 
 
 .error-message strong {
-  color: #b42318;
+  color: #fca5a5;
 
   font-size: 14px;
 }
@@ -554,7 +556,7 @@ textarea:disabled {
 .error-message p {
   margin: 4px 0 0;
 
-  color: #667085;
+  color: #d1d5db;
 
   font-size: 13px;
 
@@ -581,7 +583,7 @@ textarea:disabled {
 
   padding-bottom: 20px;
 
-  border-bottom: 1px solid #eaecf0;
+  border-bottom: 1px solid #292e38;
 }
 
 
@@ -590,7 +592,7 @@ textarea:disabled {
 
   font-size: 19px;
 
-  color: #172033;
+  color: #f3f4f6;
 }
 
 
@@ -602,7 +604,7 @@ textarea:disabled {
 .answer-content p {
   margin: 0;
 
-  color: #344054;
+  color: #d1d5db;
 
   font-size: 15px;
 
@@ -619,7 +621,7 @@ textarea:disabled {
 .sources {
   padding-top: 20px;
 
-  border-top: 1px solid #eaecf0;
+  border-top: 1px solid #292e38;
 }
 
 
@@ -639,12 +641,12 @@ textarea:disabled {
 
   font-size: 15px;
 
-  color: #344054;
+  color: #e5e7eb;
 }
 
 
 .sources-header span {
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 12px;
 }
@@ -668,11 +670,11 @@ textarea:disabled {
 
   padding: 12px;
 
-  border: 1px solid #eaecf0;
+  border: 1px solid #292e38;
 
   border-radius: 9px;
 
-  background: #fcfcfd;
+  background: #12151c;
 }
 
 
@@ -688,9 +690,9 @@ textarea:disabled {
 
   border-radius: 6px;
 
-  background: #f2f4f7;
+  background: #252a34;
 
-  color: #475467;
+  color: #cbd5e1;
 
   font-size: 12px;
   font-weight: 600;
@@ -709,7 +711,7 @@ textarea:disabled {
 
 
 .source-info strong {
-  color: #344054;
+  color: #d1d5db;
 
   font-size: 13px;
 
@@ -731,7 +733,7 @@ textarea:disabled {
 
 
 .source-meta span {
-  color: #667085;
+  color: #9ca3af;
 
   font-size: 12px;
 }
@@ -753,7 +755,7 @@ textarea:disabled {
 .footer p {
   margin: 0;
 
-  color: #98a2b3;
+  color: #6b7280;
 
   font-size: 12px;
 }
@@ -831,6 +833,7 @@ textarea:disabled {
 
 }
 
+
 .upload-area {
   margin-top: 20px;
 }
@@ -852,19 +855,20 @@ textarea:disabled {
   justify-content: center;
   padding: 10px 18px;
   border-radius: 8px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background: #252a34;
+  border: 1px solid #3b4250;
+  color: #e5e7eb;
   cursor: pointer;
   font-weight: 600;
   transition: 0.2s;
 }
 
 .file-button:hover {
-  background: #e2e8f0;
+  background: #303642;
 }
 
 .selected-file {
-  color: #64748b;
+  color: #9ca3af;
   font-size: 14px;
   flex: 1;
   min-width: 180px;
@@ -877,7 +881,7 @@ textarea:disabled {
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
-  background: #0f172a;
+  background: #6366f1;
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -885,7 +889,7 @@ textarea:disabled {
 }
 
 .upload-button:hover:not(:disabled) {
-  background: #1e293b;
+  background: #5558e8;
 }
 
 .upload-button:disabled {
@@ -900,8 +904,9 @@ textarea:disabled {
   margin-top: 18px;
   padding: 14px;
   border-radius: 8px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: #14251a;
+  border: 1px solid #245c35;
+  color: #d1fae5;
 }
 
 .success-icon {
@@ -912,11 +917,13 @@ textarea:disabled {
 .success-message strong {
   display: block;
   margin-bottom: 4px;
+  color: #bbf7d0;
 }
 
 .success-message p {
   margin: 0;
   font-size: 14px;
+  color: #a7f3d0;
 }
 
 .document-card {
@@ -937,10 +944,10 @@ textarea:disabled {
 .delete-button {
   flex-shrink: 0;
   padding: 7px 12px;
-  border: 1px solid #fecaca;
+  border: 1px solid #7f1d1d;
   border-radius: 7px;
-  background: #fff;
-  color: #dc2626;
+  background: #2a171a;
+  color: #fca5a5;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -948,17 +955,17 @@ textarea:disabled {
 }
 
 .delete-button:hover {
-  background: #fef2f2;
-  border-color: #fca5a5;
+  background: #451a1a;
+  border-color: #991b1b;
 }
 
 .source-snippet {
   margin: 10px 0 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: #181c24;
+  border: 1px solid #303642;
+  color: #b7beca;
   font-size: 13px;
   line-height: 1.6;
 }

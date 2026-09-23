@@ -2,14 +2,11 @@
   box-sizing: border-box;
 }
 
-
 html {
   margin: 0;
   padding: 0;
-
   min-height: 100%;
 }
-
 
 body {
   margin: 0;
@@ -26,14 +23,13 @@ body {
     "Segoe UI",
     sans-serif;
 
-  background: #f5f7fb;
+  background: #0f1117;
 
-  color: #172033;
+  color: #e5e7eb;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 
 button,
 textarea,
@@ -41,11 +37,9 @@ input {
   font: inherit;
 }
 
-
 button {
   -webkit-tap-highlight-color: transparent;
 }
-
 
 #root {
   min-height: 100vh;
