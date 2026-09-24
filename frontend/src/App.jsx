@@ -114,7 +114,7 @@ function App() {
    * Ask a question.
    */
   async function handleAskQuestion() {
-    if (!question.trim()) {
+    if (!question.trim() || loading) {
       return;
     }
 
@@ -123,6 +123,8 @@ function App() {
     setPendingQuestion(currentQuestion);
     setLoading(true);
     setError("");
+    setAnswer("");
+    setSources([]);
     setQuestion("");
 
     try {
@@ -131,14 +133,34 @@ function App() {
         selectedDocuments.length > 0
           ? selectedDocuments
           : null,
-        conversation
+        conversation,
+
+        /*
+         * Called whenever a new LLM token arrives.
+         */
+        (token) => {
+          setAnswer((currentAnswer) =>
+            currentAnswer + token
+          );
+        },
+
+        /*
+         * Called when retrieval sources arrive.
+         */
+        (newSources) => {
+          setSources(newSources);
+        }
       );
 
+      /*
+       * Make sure the final answer is exactly
+       * what the streaming API returned.
+       */
       setAnswer(data.answer);
       setSources(data.sources || []);
 
       /*
-       * Add the latest question and answer
+       * Add the completed question and answer
        * to the conversation history.
        */
       setConversation((currentConversation) => [
@@ -152,7 +174,9 @@ function App() {
           content: data.answer
         }
       ]);
+
       setPendingQuestion("");
+
     } catch (error) {
       console.error(error);
 
@@ -160,6 +184,7 @@ function App() {
         error.message ||
         "Something went wrong while asking the question."
       );
+
     } finally {
       setLoading(false);
     }

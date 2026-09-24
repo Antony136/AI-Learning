@@ -4,8 +4,8 @@ from ollama import chat
 MODEL = "qwen2.5-coder:7b"
 
 
-def generate_answer(question: str, context: str):
-    messages = [
+def build_messages(question: str, context: str):
+    return [
         {
             "role": "system",
             "content": (
@@ -34,6 +34,13 @@ def generate_answer(question: str, context: str):
         }
     ]
 
+
+def generate_answer(question: str, context: str):
+    messages = build_messages(
+        question,
+        context
+    )
+
     response = chat(
         model=MODEL,
         messages=messages,
@@ -44,3 +51,26 @@ def generate_answer(question: str, context: str):
     )
 
     return response.message.content
+
+
+def generate_answer_stream(question: str, context: str):
+    messages = build_messages(
+        question,
+        context
+    )
+
+    stream = chat(
+        model=MODEL,
+        messages=messages,
+        options={
+            "temperature": 0.2,
+            "num_predict": 500
+        },
+        stream=True
+    )
+
+    for chunk in stream:
+        content = chunk.message.content
+
+        if content:
+            yield content

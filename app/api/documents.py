@@ -1,11 +1,13 @@
+import json
 from pathlib import Path
 
 from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.storage.documents import get_documents, get_document
 from app.ingestion.pipeline import ingest_document
-from app.rag import answer_question
+from app.rag import answer_question_stream
 from app.generation.sources import build_sources
 
 
@@ -115,29 +117,38 @@ def ask_documents(
                     detail=f"Document {document_id} not found"
                 )
 
-    try:
+    def generate():
 
-        answer, results = answer_question(
-            question=request.question,
-            document_ids=request.document_ids,
-            conversation=request.conversation
-        )
+        try:
 
-        sources = build_sources(results)
+            for event in answer_question_stream(
+                question=request.question,
+                document_ids=request.document_ids,
+                conversation=request.conversation
+            ):
 
-        return {
-            "question": request.question,
-            "document_ids": request.document_ids,
-            "answer": answer,
-            "sources": sources
-        }
+                if event["type"] == "sources":
 
-    except Exception as error:
+                    event = {
+                        "type": "sources",
+                        "sources": build_sources(
+                            event["sources"]
+                        )
+                    }
 
-        raise HTTPException(
-            status_code=500,
-            detail=str(error)
-        )
+                yield json.dumps(event) + "\n"
+
+        except Exception as error:
+
+            yield json.dumps({
+                "type": "error",
+                "content": str(error)
+            }) + "\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="application/x-ndjson"
+    )
 
 
 @router.delete("/{document_id}")

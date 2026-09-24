@@ -223,8 +223,6 @@
 
   border-radius: 11px;
 
-  cursor: pointer;
-
   background: #12151c;
 
   transition:
@@ -1030,6 +1028,12 @@ textarea:disabled {
   flex: 1;
   min-width: 0;
   cursor: pointer;
+}
+
+.document-main:focus-within {
+  outline: 2px solid #8477e8;
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 .delete-button {

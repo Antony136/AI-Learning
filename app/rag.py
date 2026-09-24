@@ -1,17 +1,22 @@
 from app.retrieval.search import retrieve
 from app.retrieval.reranker import rerank
 from app.generation.prompts import build_context
-from app.generation.llm import generate_answer
+from app.generation.llm import (
+    generate_answer,
+    generate_answer_stream,
+)
 from app.retrieval.query_correction import correct_query
 from app.retrieval.vocabulary import get_document_vocabulary
 from app.retrieval.query_rewrite import rewrite_question
 from app.retrieval.query_normalization import normalize_query
 from app.retrieval.multi_query import multi_query_retrieve
 
+
 RERANK_THRESHOLD = 1.0
 CORRECTION_MARGIN = 2.0
 MULTI_QUERY_COUNT = 3
 MULTI_QUERY_TOP_K = 5
+
 
 def improve_query(
     question: str,
@@ -30,7 +35,6 @@ def improve_query(
         max_edit_distance=2,
     )
 
-    # No possible correction
     if not corrections:
         return question
 
@@ -98,14 +102,13 @@ def improve_query(
     return question
 
 
-
-def answer_question(
+def retrieve_context(
     question: str,
     document_ids: list[int] | None = None,
     retrieval_top_k: int = 10,
     final_top_n: int = 5,
     max_distance: float = 0.50,
-    conversation: list[dict] | None = None
+    conversation: list[dict] | None = None,
 ):
     if conversation is None:
         conversation = []
@@ -158,13 +161,10 @@ def answer_question(
     # 4. MULTI-QUERY RETRIEVAL
     # --------------------------------------------------
 
-    multi_query_count = 3
-    multi_query_top_k = 5
-
     results = multi_query_retrieve(
         question=question,
-        num_queries=multi_query_count,
-        top_k_per_query=multi_query_top_k,
+        num_queries=MULTI_QUERY_COUNT,
+        top_k_per_query=MULTI_QUERY_TOP_K,
         max_distance=max_distance,
         document_ids=document_ids
     )
@@ -182,9 +182,10 @@ def answer_question(
         )
 
         return (
-            "I could not find relevant information "
-            "in the selected documents.",
-            []
+            question,
+            None,
+            [],
+            False,
         )
 
     for index, result in enumerate(
@@ -270,9 +271,10 @@ def answer_question(
 
     if not reranked_results:
         return (
-            "I could not find relevant information "
-            "in the selected documents.",
-            []
+            question,
+            None,
+            [],
+            False,
         )
 
     # --------------------------------------------------
@@ -303,9 +305,10 @@ def answer_question(
         print("RESULT REJECTED BY RERANKER")
 
         return (
-            "I could not find relevant information "
-            "in the selected documents.",
-            []
+            question,
+            None,
+            [],
+            False,
         )
 
     # --------------------------------------------------
@@ -316,9 +319,37 @@ def answer_question(
         reranked_results
     )
 
-    # --------------------------------------------------
-    # 8. GENERATE ANSWER
-    # --------------------------------------------------
+    return (
+        question,
+        context,
+        reranked_results,
+        True,
+    )
+
+
+def answer_question(
+    question: str,
+    document_ids: list[int] | None = None,
+    retrieval_top_k: int = 10,
+    final_top_n: int = 5,
+    max_distance: float = 0.50,
+    conversation: list[dict] | None = None
+):
+    question, context, reranked_results, has_context = retrieve_context(
+        question=question,
+        document_ids=document_ids,
+        retrieval_top_k=retrieval_top_k,
+        final_top_n=final_top_n,
+        max_distance=max_distance,
+        conversation=conversation,
+    )
+
+    if not has_context:
+        return (
+            "I could not find relevant information "
+            "in the selected documents.",
+            []
+        )
 
     answer = generate_answer(
         question,
@@ -326,6 +357,54 @@ def answer_question(
     )
 
     return answer, reranked_results
+
+
+def answer_question_stream(
+    question: str,
+    document_ids: list[int] | None = None,
+    retrieval_top_k: int = 10,
+    final_top_n: int = 5,
+    max_distance: float = 0.50,
+    conversation: list[dict] | None = None
+):
+    question, context, reranked_results, has_context = retrieve_context(
+        question=question,
+        document_ids=document_ids,
+        retrieval_top_k=retrieval_top_k,
+        final_top_n=final_top_n,
+        max_distance=max_distance,
+        conversation=conversation,
+    )
+
+    if not has_context:
+        yield {
+            "type": "complete",
+            "content": (
+                "I could not find relevant information "
+                "in the selected documents."
+            ),
+            "sources": [],
+        }
+        return
+
+    for chunk in generate_answer_stream(
+        question,
+        context
+    ):
+        yield {
+            "type": "token",
+            "content": chunk,
+        }
+
+    yield {
+        "type": "sources",
+        "sources": reranked_results,
+    }
+
+    yield {
+        "type": "done",
+    }
+
 
 if __name__ == "__main__":
 

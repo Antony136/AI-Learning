@@ -4,7 +4,7 @@ function ErrorMessage({ error }) {
   }
 
   return (
-    <div className="error-message">
+    <div className="error-message" role="alert">
 
       <div className="error-icon">
         !

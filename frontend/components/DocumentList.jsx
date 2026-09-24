@@ -67,13 +67,13 @@ function DocumentList({
 
   return (
 
-    <section className="card">
+    <section className="card" aria-labelledby="documents-heading">
 
       <div className="section-header">
 
         <div>
 
-          <h2>
+          <h2 id="documents-heading">
             Documents
           </h2>
 
