@@ -1,23 +1,75 @@
-function AnswerCard({ answer, sources, onClear }) {
-  if (!answer) return null;
+function AnswerCard({
+  answer,
+  conversation,
+  pendingQuestion,
+  loading,
+  sources,
+  onClear
+}) {
+  const hasConversation =
+    conversation.length > 0 ||
+    pendingQuestion ||
+    loading ||
+    answer;
+
+  if (!hasConversation) {
+    return (
+      <section className="card chat-empty-state">
+        <div className="chat-empty-icon">AI</div>
+        <h2>Ask your documents anything</h2>
+        <p>Select documents above or search your full knowledge base with a question.</p>
+      </section>
+    );
+  }
 
   return (
-    <section className="card answer-card">
+    <section className="card answer-card chat-card">
       <div className="answer-header">
         <div>
-          <h2>Answer</h2>
+          <h2>Conversation</h2>
           <p className="section-description">
-            Generated using the retrieved document context.
+            Questions and answers from this session.
           </p>
         </div>
 
         <button className="clear-button" onClick={onClear}>
-          Clear
+          Clear conversation
         </button>
       </div>
 
-      <div className="answer-content">
-        <p>{answer}</p>
+      <div className="chat-messages" aria-live="polite">
+        {conversation.map((message, index) => (
+          <div
+            key={`${message.role}-${index}`}
+            className={`chat-message ${message.role}`}
+          >
+            <span className="message-label">
+              {message.role === "user" ? "You" : "AI"}
+            </span>
+            <div className="message-content">
+              <p>{message.content}</p>
+            </div>
+          </div>
+        ))}
+
+        {pendingQuestion && (
+          <div className="chat-message user pending-message">
+            <span className="message-label">You</span>
+            <div className="message-content">
+              <p>{pendingQuestion}</p>
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div className="chat-message assistant thinking-message">
+            <span className="message-label">AI</span>
+            <div className="message-content thinking-content">
+              <span className="spinner dark"></span>
+              <span>Thinking...</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {sources.length > 0 && (

@@ -23,6 +23,7 @@ function App() {
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState([]);
   const [conversation, setConversation] = useState([]);
+  const [pendingQuestion, setPendingQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [error, setError] = useState("");
@@ -119,10 +120,10 @@ function App() {
 
     const currentQuestion = question.trim();
 
+    setPendingQuestion(currentQuestion);
     setLoading(true);
     setError("");
-    setAnswer("");
-    setSources([]);
+    setQuestion("");
 
     try {
       const data = await askQuestion(
@@ -151,6 +152,7 @@ function App() {
           content: data.answer
         }
       ]);
+      setPendingQuestion("");
     } catch (error) {
       console.error(error);
 
@@ -172,6 +174,7 @@ function App() {
     setAnswer("");
     setSources([]);
     setConversation([]);
+    setPendingQuestion("");
     setError("");
   }
 
@@ -197,20 +200,23 @@ function App() {
           loading={loadingDocuments}
         />
 
+        <AnswerCard
+          answer={answer}
+          conversation={conversation}
+          pendingQuestion={pendingQuestion}
+          loading={loading}
+          sources={sources}
+          onClear={clearAnswer}
+        />
+
+        <ErrorMessage error={error} />
+
         <QuestionBox
           question={question}
           setQuestion={setQuestion}
           onAskQuestion={handleAskQuestion}
           loading={loading}
           selectedDocuments={selectedDocuments}
-        />
-
-        <ErrorMessage error={error} />
-
-        <AnswerCard
-          answer={answer}
-          sources={sources}
-          onClear={clearAnswer}
         />
       </main>
 

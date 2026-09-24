@@ -30,12 +30,11 @@ function QuestionBox({
         <div>
 
           <h2>
-            Ask a question
+            Ask your documents
           </h2>
 
           <p className="section-description">
-            Ask something about the
-            selected documents.
+            Ask a question and continue the conversation with your document context.
           </p>
 
         </div>
@@ -44,6 +43,7 @@ function QuestionBox({
 
 
       <textarea
+        aria-label="Ask a question about your documents"
         value={question}
         onChange={(event) =>
           setQuestion(
@@ -51,7 +51,7 @@ function QuestionBox({
           )
         }
         onKeyDown={handleKeyDown}
-        placeholder="Example: What is RAG and how does it work?"
+        placeholder="Ask a question about your documents..."
         rows={5}
         disabled={loading}
       />

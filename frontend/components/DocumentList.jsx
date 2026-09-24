@@ -163,6 +163,7 @@ function DocumentList({
 
                   <input
                     type="checkbox"
+                    aria-label={`Select ${document.filename}`}
                     checked={
                       selectedDocuments.includes(
                         document.id
@@ -207,6 +208,7 @@ function DocumentList({
 
                 <button
                   className="delete-button"
+                  aria-label={`Delete ${document.filename}`}
                   onClick={() =>
                     handleDelete(
                       document.id,

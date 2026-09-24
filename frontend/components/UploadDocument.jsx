@@ -177,9 +177,13 @@ function UploadDocument({
 
           <span className="selected-file">
 
-            {selectedFile
-              ? selectedFile.name
-              : "No file selected"}
+            {selectedFile ? (
+              <span title={selectedFile.name}>
+                {selectedFile.name}
+              </span>
+            ) : (
+              "No file selected"
+            )}
 
           </span>
 
@@ -220,7 +224,7 @@ function UploadDocument({
 
         {uploadMessage && (
 
-          <div className="success-message">
+          <div className="success-message" role="status" aria-live="polite">
 
             <div className="success-icon">
               ✓
