@@ -1,25 +1,28 @@
 from ollama import embed
 
-from app.storage.chunks import insert_chunk
+from app.storage.chunks import create_document, insert_chunk
 
 
-text = "RAG retrieves relevant information before generating an answer."
+def test_insert_chunk():
 
+    text = "RAG retrieves relevant information before generating an answer."
 
-response = embed(
-    model="nomic-embed-text",
-    input=text
-)
+    response = embed(
+        model="nomic-embed-text",
+        input=text
+    )
 
-embedding = response.embeddings[0]
+    embedding = response.embeddings[0]
 
+    document_id = create_document("test.txt")
 
-insert_chunk(
-    source="test.txt",
-    page=1,
-    chunk_index=1,
-    content=text,
-    embedding=embedding
-)
+    insert_chunk(
+        document_id=document_id,
+        source="test.txt",
+        page=1,
+        chunk_index=1,
+        content=text,
+        embedding=embedding
+    )
 
-print("Chunk inserted successfully!")
+    assert document_id is not None

@@ -3,9 +3,16 @@ from sentence_transformers import CrossEncoder
 
 MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-reranker = CrossEncoder(
-    MODEL_NAME
-)
+_reranker = None
+
+
+def get_reranker():
+    global _reranker
+
+    if _reranker is None:
+        _reranker = CrossEncoder(MODEL_NAME)
+
+    return _reranker
 
 
 def rerank(
@@ -23,6 +30,8 @@ def rerank(
         )
         for result in results
     ]
+
+    reranker = get_reranker()
 
     scores = reranker.predict(pairs)
 

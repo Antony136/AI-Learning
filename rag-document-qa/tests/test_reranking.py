@@ -1,72 +1,60 @@
-from app.retrieval.search import retrieve
 from app.retrieval.reranker import rerank
 
 
-questions = [
-    "What is RAG?",
-    "What are embeddings?",
-    "What is a vector store?",
-    "What is fine-tuning?",
-    "What is an AI agent?",
-    "What is a priority queue?"
-]
+def test_reranker_prioritizes_relevant_result():
+    question = "What is RAG?"
 
-
-for question in questions:
-
-    print("\n")
-    print("=" * 80)
-    print(f"QUESTION: {question}")
-    print("=" * 80)
-
-    results = retrieve(
-        question,
-        top_k=10,
-        max_distance=0.50
-    )
-
-    if not results:
-        print("\nNo vector search results.")
-        continue
-
-    print("\nVECTOR SEARCH")
-    print("-" * 80)
-
-    for index, result in enumerate(
-        results,
-        start=1
-    ):
-
-        print(
-            f"Rank {index} | "
-            f"Distance: {result['distance']:.4f} | "
-            f"Page: {result['page']} | "
-            f"Chunk: {result['chunk_index']}"
-        )
+    results = [
+        {
+            "id": 1,
+            "document_id": 1,
+            "source": "pytest_reranking.pdf",
+            "page": 1,
+            "chunk_index": 1,
+            "content": (
+                "RAG retrieves relevant information from documents "
+                "and provides that information to a language model."
+            ),
+            "distance": 0.30,
+        },
+        {
+            "id": 2,
+            "document_id": 1,
+            "source": "pytest_reranking.pdf",
+            "page": 1,
+            "chunk_index": 2,
+            "content": (
+                "Priority queues store elements according to their "
+                "priority and are commonly implemented using heaps."
+            ),
+            "distance": 0.20,
+        },
+        {
+            "id": 3,
+            "document_id": 1,
+            "source": "pytest_reranking.pdf",
+            "page": 1,
+            "chunk_index": 3,
+            "content": (
+                "Fine-tuning adapts a pretrained language model "
+                "using additional training data."
+            ),
+            "distance": 0.25,
+        },
+    ]
 
     reranked = rerank(
-        question,
-        results,
-        top_n=5
+        question=question,
+        results=results,
+        top_n=3,
     )
 
-    print("\nRERANKED RESULTS")
-    print("-" * 80)
+    assert isinstance(reranked, list)
+    assert len(reranked) == 3
 
-    for index, result in enumerate(
-        reranked,
-        start=1
-    ):
+    assert "rerank_score" in reranked[0]
 
-        print(
-            f"Rank {index} | "
-            f"Score: {result['rerank_score']:.4f} | "
-            f"Distance: {result['distance']:.4f} | "
-            f"Page: {result['page']} | "
-            f"Chunk: {result['chunk_index']}"
-        )
-
-        print(
-            f"Preview: "
-            f"{result['content'][:200]}"
-        )
+    assert reranked[0]["content"] == (
+        "RAG retrieves relevant information from documents "
+        "and provides that information to a language model."
+    )

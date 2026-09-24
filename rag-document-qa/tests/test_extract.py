@@ -1,53 +1,60 @@
-from pypdf import PdfReader
+from pathlib import Path
 
-def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200):
-    chunks = []
+from reportlab.pdfgen import canvas
 
-    start = 0
-
-    while start < len(text):
-
-        end = start + chunk_size
-
-        chunk = text[start:end]
-
-        chunks.append(chunk)
-
-        start += chunk_size - overlap
-
-    return chunks
+from app.ingestion.extract import extract_pages
 
 
-pdf_path = "documents/genai-notes.pdf"
+def create_test_pdf(pdf_path: Path):
+    pdf = canvas.Canvas(str(pdf_path))
+
+    pdf.drawString(
+        100,
+        750,
+        "RAG retrieves relevant information."
+    )
+
+    pdf.showPage()
+
+    pdf.drawString(
+        100,
+        750,
+        "The language model uses the retrieved context."
+    )
+
+    pdf.showPage()
+
+    pdf.save()
 
 
-reader = PdfReader(pdf_path)
+def test_extract_pages_returns_list(tmp_path):
+    pdf_path = tmp_path / "test.pdf"
 
-full_text = ""
+    create_test_pdf(pdf_path)
 
-for page in reader.pages:
+    pages = extract_pages(str(pdf_path))
 
-    text = page.extract_text()
-
-    if text:
-        full_text += text + "\n"
-
-
-chunks = chunk_text(
-    full_text,
-    chunk_size=1000,
-    overlap=200
-)
+    assert isinstance(pages, list)
+    assert len(pages) == 2
 
 
-print("Total characters:", len(full_text))
-print("Number of chunks:", len(chunks))
+def test_extract_pages_contains_page_numbers(tmp_path):
+    pdf_path = tmp_path / "test.pdf"
+
+    create_test_pdf(pdf_path)
+
+    pages = extract_pages(str(pdf_path))
+
+    assert pages[0]["page"] == 1
+    assert pages[1]["page"] == 2
 
 
-for index, chunk in enumerate(chunks, start=1):
+def test_extract_pages_contains_text(tmp_path):
+    pdf_path = tmp_path / "test.pdf"
 
-    print("\n" + "=" * 60)
-    print(f"CHUNK {index}")
-    print("=" * 60)
+    create_test_pdf(pdf_path)
 
-    print(chunk)
+    pages = extract_pages(str(pdf_path))
+
+    assert "RAG retrieves relevant information." in pages[0]["text"]
+    assert "language model uses the retrieved context." in pages[1]["text"]

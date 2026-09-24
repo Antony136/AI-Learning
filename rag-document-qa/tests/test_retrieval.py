@@ -1,35 +1,51 @@
-from app.ingestion.embeddings import generate_embedding
-from app.retrieval.vector_store import search_similar_chunks
+from ollama import embed
+
+from app.retrieval.search import retrieve
+from app.storage.chunks import create_document, insert_chunk
 
 
-question = "What is RAG?"
+EMBEDDING_MODEL = "nomic-embed-text"
 
 
-query_embedding = generate_embedding(question)
+def get_embedding(text: str):
+    response = embed(
+        model=EMBEDDING_MODEL,
+        input=text
+    )
+
+    return response.embeddings[0]
 
 
-results = search_similar_chunks(
-    query_embedding,
-    top_k=5
-)
+def test_retrieve_returns_relevant_chunk():
 
+    document_id = create_document(
+        "pytest_retrieval.pdf"
+    )
 
-print("\nQuestion:")
-print(question)
+    content = (
+        "RAG retrieves relevant information from documents "
+        "before generating an answer."
+    )
 
-print("\nRetrieved chunks:")
-print("=" * 70)
+    embedding = get_embedding(content)
 
+    insert_chunk(
+        document_id=document_id,
+        source="pytest_retrieval.pdf",
+        page=1,
+        chunk_index=1,
+        content=content,
+        embedding=embedding
+    )
 
-for index, result in enumerate(results, start=1):
+    results = retrieve(
+        question="How does RAG retrieve information?",
+        top_k=3,
+        max_distance=0.50
+    )
 
-    print(f"\nResult {index}")
-    print(f"Distance: {result['distance']:.4f}")
-    print(f"Source: {result['source']}")
-    print(f"Page: {result['page']}")
-    print(f"Chunk: {result['chunk_index']}")
+    assert isinstance(results, list)
+    assert len(results) > 0
 
-    print("\nContent:")
-    print(result["content"])
-
-    print("=" * 70)
+    assert results[0]["document_id"] == document_id
+    assert results[0]["content"] == content
