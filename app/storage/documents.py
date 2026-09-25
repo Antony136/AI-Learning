@@ -16,7 +16,8 @@ def get_documents():
                     d.chunk_count,
                     d.status,
                     d.stage,
-                    d.created_at
+                    d.created_at,
+                    d.file_path
                 FROM documents d
                 ORDER BY d.created_at DESC
                 """
@@ -33,7 +34,8 @@ def get_documents():
                 "chunk_count": row[4],
                 "status": row[5],
                 "stage": row[6],
-                "created_at": row[7]
+                "created_at": row[7],
+                "file_path": row[8]
             }
             for row in rows
         ]
@@ -57,7 +59,8 @@ def get_document(document_id: int):
                     d.chunk_count,
                     d.status,
                     d.stage,
-                    d.created_at
+                    d.created_at,
+                    d.file_path
                 FROM documents d
                 WHERE d.id = %s
                 """,
@@ -77,7 +80,8 @@ def get_document(document_id: int):
             "chunk_count": row[4],
             "status": row[5],
             "stage": row[6],
-            "created_at": row[7]
+            "created_at": row[7],
+            "file_path": row[8]
         }
 
     finally:

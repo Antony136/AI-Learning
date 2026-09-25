@@ -1,0 +1,429 @@
+/* =========================================================
+   DOCUMENT LIST
+   ========================================================= */
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.document-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-input);
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.document-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.document-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.document-card.processing {
+  border-color: var(--border-strong);
+  border-style: dashed;
+}
+
+.document-card.failed {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+
+/* =========================================================
+   DOCUMENT MAIN
+   ========================================================= */
+
+.document-main {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.document-main:focus-within {
+  outline: none;
+}
+
+.document-card:has(input[type="checkbox"]:focus-visible) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.document-card input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   DOCUMENT ICON
+   ========================================================= */
+
+.document-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.document-card.selected .document-icon {
+  border-color: rgba(117, 103, 217, 0.35);
+  background: rgba(117, 103, 217, 0.12);
+}
+
+
+/* =========================================================
+   DOCUMENT INFORMATION
+   ========================================================= */
+
+.document-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.document-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.document-title-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+
+/* =========================================================
+   DOCUMENT STATUS
+   ========================================================= */
+
+.document-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.document-status.ready {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.document-status.failed {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.10);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+.document-status.processing {
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.document-status-icon {
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.document-status.ready .document-status-icon {
+  background: rgba(34, 197, 94, 0.18);
+}
+
+.document-status.failed .document-status-icon {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+
+/* =========================================================
+   DOCUMENT METADATA
+   ========================================================= */
+
+.document-metadata {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.document-metadata > span:not(.metadata-separator) {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.metadata-separator {
+  display: none;
+}
+
+.document-date {
+  display: block;
+  margin-top: 1px;
+  color: var(--text-subtle);
+  font-size: 11px;
+}
+
+.document-processing-text {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   DOCUMENT SELECTION
+   ========================================================= */
+
+.document-check {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: transparent;
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.document-card:hover .document-check {
+  border-color: var(--accent);
+}
+
+.document-card.selected .document-check {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+  transform: scale(1.03);
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
+
+.delete-button {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 7px;
+  background: rgba(239, 68, 68, 0.06);
+  color: #f87171;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.delete-button:hover {
+  background: rgba(239, 68, 68, 0.13);
+  border-color: rgba(239, 68, 68, 0.55);
+  color: #fca5a5;
+}
+
+.delete-button:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   DOCUMENT PROCESSING
+   ========================================================= */
+
+.spinner.small {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+}
+
+.empty-icon {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.empty-state h3 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   DOCUMENT RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .document-card {
+    align-items: flex-start;
+    padding: 13px;
+  }
+
+  .document-main {
+    align-items: flex-start;
+  }
+
+  .document-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .document-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .document-title-row strong {
+    max-width: 100%;
+  }
+
+  .document-metadata {
+    gap: 5px;
+  }
+
+  .document-date {
+    font-size: 10px;
+  }
+
+  .document-check {
+    margin-left: 0;
+  }
+
+  .delete-button {
+    margin-top: 1px;
+    padding: 6px 9px;
+  }
+}
+
+
+@media (max-width: 520px) {
+
+  .document-card {
+    gap: 9px;
+  }
+
+  .document-main {
+    gap: 9px;
+  }
+
+  .document-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 9px;
+  }
+
+  .document-title-row strong {
+    font-size: 13px;
+  }
+
+  .document-status {
+    font-size: 10px;
+  }
+
+  .document-metadata > span:not(.metadata-separator) {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .document-check {
+    width: 24px;
+    height: 24px;
+  }
+
+  .delete-button {
+    font-size: 11px;
+  }
+}

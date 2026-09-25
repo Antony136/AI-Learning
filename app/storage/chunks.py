@@ -3,7 +3,8 @@ from app.core.database import get_connection
 
 def create_document(
     filename: str,
-    file_size: int | None = None
+    file_size: int | None = None,
+    file_path: str | None = None
 ):
     connection = get_connection()
 
@@ -14,14 +15,16 @@ def create_document(
                 INSERT INTO documents (
                     filename,
                     file_size,
+                    file_path,
                     status
                 )
-                VALUES (%s, %s, %s)
+                VALUES (%s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
                     filename,
                     file_size,
+                    file_path,
                     "processing"
                 )
             )
@@ -34,6 +37,7 @@ def create_document(
 
     finally:
         connection.close()
+
 
 def update_document_metadata(
     document_id: int,
@@ -114,7 +118,8 @@ def get_document_status(document_id: int):
                     chunk_count,
                     status,
                     stage,
-                    created_at
+                    created_at,
+                    file_path
                 FROM documents
                 WHERE id = %s
                 """,
@@ -134,13 +139,14 @@ def get_document_status(document_id: int):
                 "chunk_count": row[4],
                 "status": row[5],
                 "stage": row[6],
-                "created_at": row[7]
+                "created_at": row[7],
+                "file_path": row[8]
             }
 
     finally:
         connection.close()
 
-        
+
 def insert_chunk(
     document_id: int,
     source: str,

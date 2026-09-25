@@ -3,8 +3,9 @@ import queue
 import threading
 from pathlib import Path
 
+from app.core.database import get_connection
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
 from app.storage.documents import get_documents, get_document
@@ -48,6 +49,88 @@ class QuestionRequest(BaseModel):
 @router.get("")
 def list_documents():
     return get_documents()
+
+@router.get("/{document_id}/pdf")
+def get_document_pdf(document_id: int):
+    document = get_document(document_id)
+
+    if not document:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found."
+        )
+
+    file_path = document.get("file_path")
+
+    if not file_path:
+        raise HTTPException(
+            status_code=404,
+            detail="PDF file path not found."
+        )
+
+    pdf_path = Path(file_path)
+
+    if not pdf_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="PDF file not found on server."
+        )
+
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{document["filename"]}"'
+        }
+    )
+
+@router.get("/{document_id}/sources/{chunk_id}")
+def get_source_chunk(document_id: int, chunk_id: int):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    dc.id,
+                    dc.document_id,
+                    dc.source,
+                    dc.page,
+                    dc.chunk_index,
+                    dc.content,
+                    d.filename,
+                    d.file_path
+                FROM document_chunks dc
+                JOIN documents d
+                    ON dc.document_id = d.id
+                WHERE dc.document_id = %s
+                  AND dc.id = %s
+                """,
+                (document_id, chunk_id)
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Source chunk not found."
+                )
+
+            return {
+                "chunk_id": row[0],
+                "document_id": row[1],
+                "source": row[2],
+                "page": row[3],
+                "chunk": row[4],
+                "content": row[5],
+                "filename": row[6],
+                "file_path": row[7]
+            }
+
+    finally:
+        connection.close()
 
 
 @router.get("/{document_id}/status")
@@ -202,10 +285,6 @@ async def upload_document(file: UploadFile = File(...)):
                 )
                 + "\n"
             )
-
-
-        if file_path.exists():
-            file_path.unlink()
 
 
     return StreamingResponse(

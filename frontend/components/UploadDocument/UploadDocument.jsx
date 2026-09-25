@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { uploadDocument } from "../services/api";
+import { uploadDocument } from "../../services/api";
+import "./UploadDocument.css";
 
 
 function formatFileSize(bytes) {

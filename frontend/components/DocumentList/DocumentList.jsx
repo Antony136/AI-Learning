@@ -1,5 +1,5 @@
-import { deleteDocument } from "../services/api";
-
+import { deleteDocument } from "../../services/api";
+import "./DocumentList.css";
 
 function formatFileSize(bytes) {
   if (!bytes) {

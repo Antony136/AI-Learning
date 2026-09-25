@@ -6,6 +6,7 @@ def build_sources(results):
 
         sources.append(
             {
+                "chunk_id": result["id"],
                 "document_id": result["document_id"],
                 "source": result["source"],
                 "page": result["page"],

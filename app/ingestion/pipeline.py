@@ -22,7 +22,8 @@ def ingest_document(
 
     document_id = create_document(
         filename=pdf_file.name,
-        file_size=file_size
+        file_size=file_size,
+        file_path=str(pdf_file)
     )
 
     try:

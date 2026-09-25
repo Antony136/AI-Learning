@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
+import "./ChatList.css";
 
 function ChatList({
   chats,

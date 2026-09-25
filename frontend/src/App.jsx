@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 import Header from "../components/Header";
-import UploadDocument from "../components/UploadDocument";
-import DocumentList from "../components/DocumentList";
-import ChatList from "../components/ChatList";
+import UploadDocument from "../components/UploadDocument/UploadDocument";
+import DocumentList from "../components/DocumentList/DocumentList";
+import ChatList from "../components/ChatList/ChatList";
 import QuestionBox from "../components/QuestionBox";
-import AnswerCard from "../components/AnswerCard";
+import AnswerCard from "../components/AnswerCard/AnswerCard";
 import ErrorMessage from "../components/ErrorMessage";
 import Footer from "../components/Footer";
 
