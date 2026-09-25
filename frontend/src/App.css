@@ -1732,14 +1732,9 @@ textarea:disabled {
 .chat-messages {
   display: flex;
   flex-direction: column;
-
   gap: 18px;
-
   padding: 20px 4px 4px 0;
   min-height: 120px;
-  max-height: 65vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .chat-message {
