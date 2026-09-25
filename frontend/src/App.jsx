@@ -131,20 +131,40 @@ function App() {
       );
 
 
-      setConversation(
-        data.messages.map((message) => ({
-          role: message.role,
-          content: message.content
-        }))
-      );
+      const rawMessages = data.messages.map((message) => ({
+        role: message.role,
+        content: message.content
+      }));
 
+      // Restore per-message sources from localStorage
+      let storedSourcesMap = {};
+      try {
+        storedSourcesMap = JSON.parse(
+          localStorage.getItem(`rag_chat_sources_${targetSessionId}`) || "{}"
+        );
+      } catch {
+        storedSourcesMap = {};
+      }
 
-      /*
-       * Clear the currently displayed
-       * answer-specific state.
-       */
+      const restoredConversation = rawMessages.map((msg, idx) => {
+        if (msg.role === "assistant" && storedSourcesMap[idx]) {
+          return {
+            ...msg,
+            sources: storedSourcesMap[idx]
+          };
+        }
+        return msg;
+      });
+
+      setConversation(restoredConversation);
+
+      // Restore sources for the latest prompt if available
+      const lastAssistantWithSources = [...restoredConversation]
+        .reverse()
+        .find((msg) => msg.role === "assistant" && msg.sources && msg.sources.length > 0);
+
       setAnswer("");
-      setSources([]);
+      setSources(lastAssistantWithSources?.sources || []);
       setPendingQuestion("");
       setQuestion("");
 
@@ -578,23 +598,39 @@ async function handleDeleteChat(
 
       /*
        * Add the completed question and answer
-       * to the local conversation.
+       * to the local conversation, with persistent sources.
        */
-      setConversation(
-        (currentConversation) => [
-          ...currentConversation,
+      const finalSources = data.sources || [];
 
+      setConversation((currentConversation) => {
+        const updated = [
+          ...currentConversation,
           {
             role: "user",
             content: currentQuestion
           },
-
           {
             role: "assistant",
-            content: data.answer
+            content: data.answer,
+            sources: finalSources
           }
-        ]
-      );
+        ];
+
+        // Save sources map to localStorage for this session
+        try {
+          const sourcesMap = {};
+          updated.forEach((msg, idx) => {
+            if (msg.role === "assistant" && msg.sources && msg.sources.length > 0) {
+              sourcesMap[idx] = msg.sources;
+            }
+          });
+          localStorage.setItem(`rag_chat_sources_${sessionId}`, JSON.stringify(sourcesMap));
+        } catch (e) {
+          console.error("Could not cache sources to localStorage:", e);
+        }
+
+        return updated;
+      });
 
 
       /*

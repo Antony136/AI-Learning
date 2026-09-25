@@ -1,58 +1,45 @@
 :root {
   color-scheme: dark;
-
-  /* Custom Scrollbar Variables */
-  --scrollbar-width: 6px;
-  --scrollbar-track-bg: transparent;
-  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.16);
-  --scrollbar-thumb-hover-bg: rgba(255, 255, 255, 0.32);
+  --base-font-size: 14px;
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);
-  --scrollbar-thumb-hover-bg: rgba(0, 0, 0, 0.4);
+}
+
+[data-text-size="small"] {
+  --base-font-size: 12px;
+}
+
+[data-text-size="medium"] {
+  --base-font-size: 14px;
+}
+
+[data-text-size="large"] {
+  --base-font-size: 16.5px;
 }
 
 * {
   box-sizing: border-box;
 
-  /* Firefox Scrollbar Styling */
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+  /* Firefox Scrollbar Hidden Visually */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Chrome / WebKit / Edge Scrollbar Styling */
+/* Chrome / WebKit / Edge Scrollbar Hidden Visually */
 ::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-  height: var(--scrollbar-width);
-}
-
-::-webkit-scrollbar-track {
-  background: var(--scrollbar-track-bg);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb-bg);
-  border-radius: 9999px;
-  border: 1px solid transparent;
-  background-clip: content-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover-bg);
-  background-clip: content-box;
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 html {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  height: 100%;
+  font-size: var(--base-font-size, 14px);
 }
 
 body {
@@ -60,10 +47,10 @@ body {
   padding: 0;
 
   min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
 
   font-family: var(--font-family, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
-  font-size: var(--base-font-size, 14px);
+  font-size: 1rem;
 
   background: var(--app-background, #0f1117);
   color: var(--text, #e5e7eb);
@@ -72,6 +59,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   transition: background-color 0.25s ease, color 0.25s ease;
+  overflow: hidden;
 }
 
 button,
@@ -95,5 +83,5 @@ label:focus-visible {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
 }

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ReactMarkdown from "react-markdown";
 
@@ -12,6 +12,8 @@ function AnswerCard({
   onClear
 }) {
   const [showSources, setShowSources] = useState(false);
+  const messagesEndRef = useRef(null);
+  const chatMessagesContainerRef = useRef(null);
 
   const hasConversation =
     conversation.length > 0 ||
@@ -19,17 +21,26 @@ function AnswerCard({
     loading ||
     answer;
 
-  if (!hasConversation) {
-    return (
-      <section className="card chat-empty-state">
-        <div className="chat-empty-icon">AI</div>
-        <h2>Ask your documents anything</h2>
-        <p>
-          Select documents above or search your full knowledge base with a question.
-        </p>
-      </section>
-    );
-  }
+  /*
+   * Scroll smoothly when a new question is submitted or conversation changes
+   */
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [conversation.length, pendingQuestion, loading]);
+
+  const isEmpty =
+    conversation.length === 0 &&
+    !pendingQuestion &&
+    !loading &&
+    !answer;
+
+  // Find the index of the last assistant message in conversation
+  const lastAssistantIndex = conversation
+    .map((m, i) => (m.role === "assistant" ? i : -1))
+    .filter((i) => i !== -1)
+    .pop();
 
   return (
     <section className="card answer-card chat-card">
@@ -42,36 +53,67 @@ function AnswerCard({
           </p>
         </div>
 
-        <button
-          className="clear-button"
-          onClick={onClear}
-        >
-          Clear conversation
-        </button>
+        <div className="answer-header-actions">
+          <button
+            type="button"
+            className="jump-to-ask-button"
+            onClick={() => {
+              document.getElementById("question-box-card")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            title="Go to Ask Question"
+          >
+            <span>↓</span> Ask Question
+          </button>
+
+          {conversation.length > 0 && (
+            <button
+              className="clear-button"
+              onClick={onClear}
+            >
+              Clear conversation
+            </button>
+          )}
+        </div>
       </div>
 
 
-      <div className="chat-messages" aria-live="polite">
+      <div
+        className="chat-messages"
+        aria-live="polite"
+        ref={chatMessagesContainerRef}
+      >
 
-        {conversation.map((message, index) => (
-          message.role === "assistant" ? (
-            <AssistantMessage
-              key={`${message.role}-${index}`}
-              content={message.content}
-            />
-          ) : (
-            <div
-              key={`${message.role}-${index}`}
-              className="chat-message user"
-            >
-              <span className="message-label">You</span>
+        {isEmpty ? (
+          <div className="conversation-empty-placeholder">
+            <div className="chat-empty-icon">AI</div>
+            <h3>Ask your documents anything</h3>
+            <p>
+              Type your question below to start a conversation with your document context.
+            </p>
+          </div>
+        ) : (
+          conversation.map((message, index) => (
+            message.role === "assistant" ? (
+              <AssistantMessage
+                key={`${message.role}-${index}`}
+                content={message.content}
+                sources={message.sources}
+                showInlineSourcesToggle={true}
+              />
+            ) : (
+              <div
+                key={`${message.role}-${index}`}
+                className="chat-message user"
+              >
+                <span className="message-label">You</span>
 
-              <div className="message-content">
-                <p>{message.content}</p>
+                <div className="message-content">
+                  <p>{message.content}</p>
+                </div>
               </div>
-            </div>
-          )
-        ))}
+            )
+          ))
+        )}
 
 
         {pendingQuestion && (
@@ -100,107 +142,14 @@ function AnswerCard({
         {loading && answer && (
           <AssistantMessage
             content={answer}
+            sources={sources}
+            showInlineSourcesToggle={true}
           />
         )}
 
+        <div ref={messagesEndRef} />
+
       </div>
-
-
-      {sources.length > 0 && (
-        <div className="sources">
-
-          <button
-            type="button"
-            className="sources-toggle"
-            aria-expanded={showSources}
-            aria-controls="answer-sources-list"
-            onClick={() =>
-              setShowSources((current) => !current)
-            }
-          >
-            <span className="source-toggle-copy">
-              <strong>Sources</strong>
-
-              <span className="source-toggle-state">
-                {showSources
-                  ? "Hide sources"
-                  : "Show sources"}
-              </span>
-            </span>
-
-            <span className="source-count">
-              {sources.length} source
-              {sources.length === 1 ? "" : "s"}
-            </span>
-
-            <span
-              className="source-toggle-icon"
-              aria-hidden="true"
-            />
-          </button>
-
-
-          {showSources && (
-            <div
-              id="answer-sources-list"
-              className="sources-list"
-            >
-
-              {sources.map((source, index) => (
-                <div
-                  key={`${source.document_id}-${source.page}-${source.chunk}-${index}`}
-                  className="source-card"
-                >
-
-                  <div className="source-number">
-                    {index + 1}
-                  </div>
-
-                  <div className="source-info">
-
-                    {source.source && (
-                      <strong>
-                        {source.source}
-                      </strong>
-                    )}
-
-                    <div className="source-meta">
-
-                      {source.document_id != null && (
-                        <span>
-                          Document {source.document_id}
-                        </span>
-                      )}
-
-                      {source.page != null && (
-                        <span>
-                          Page {source.page}
-                        </span>
-                      )}
-
-                      {source.chunk != null && (
-                        <span>
-                          Chunk {source.chunk}
-                        </span>
-                      )}
-
-                    </div>
-
-                    {source.snippet && (
-                      <p className="source-snippet">
-                        {source.snippet}
-                      </p>
-                    )}
-
-                  </div>
-                </div>
-              ))}
-
-            </div>
-          )}
-
-        </div>
-      )}
 
     </section>
   );
@@ -282,9 +231,14 @@ function CodeBlock({
 
 
 function AssistantMessage({
-  content
+  content,
+  sources,
+  showInlineSourcesToggle
 }) {
   const contentRef = useRef(null);
+  const [showInlineSources, setShowInlineSources] = useState(false);
+
+  const hasSources = sources && Array.isArray(sources) && sources.length > 0;
 
   return (
     <div className="chat-message assistant">
@@ -356,13 +310,78 @@ function AssistantMessage({
         </div>
 
         <div className="message-actions">
+
+          {hasSources && showInlineSourcesToggle && (
+            <button
+              type="button"
+              className={`message-sources-button ${
+                showInlineSources ? "active" : ""
+              }`}
+              onClick={() => setShowInlineSources((prev) => !prev)}
+              title="Toggle Sources for this message"
+            >
+              <span>📚</span>
+              <span>
+                {showInlineSources
+                  ? "Hide Sources"
+                  : `Sources (${sources.length})`}
+              </span>
+            </button>
+          )}
+
           <CopyButton
             getText={() =>
               contentRef.current?.innerText ||
               content
             }
           />
+
         </div>
+
+        {hasSources && showInlineSourcesToggle && showInlineSources && (
+          <div className="message-inline-sources">
+            <h4>Referenced Sources</h4>
+
+            <div className="sources-list">
+              {sources.map((source, index) => (
+                <div
+                  key={`${source.document_id}-${source.page}-${source.chunk}-${index}`}
+                  className="source-card compact"
+                >
+                  <div className="source-number">
+                    {index + 1}
+                  </div>
+
+                  <div className="source-info">
+                    {source.source && (
+                      <strong>{source.source}</strong>
+                    )}
+
+                    <div className="source-meta">
+                      {source.document_id != null && (
+                        <span>Doc {source.document_id}</span>
+                      )}
+
+                      {source.page != null && (
+                        <span>Page {source.page}</span>
+                      )}
+
+                      {source.chunk != null && (
+                        <span>Chunk {source.chunk}</span>
+                      )}
+                    </div>
+
+                    {source.snippet && (
+                      <p className="source-snippet">
+                        {source.snippet}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
 
