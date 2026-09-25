@@ -2470,3 +2470,143 @@ textarea:disabled {
     padding: 18px;
   }
 }
+
+/* =========================================================
+   Document Metadata
+   ========================================================= */
+
+.document-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.document-title-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.document-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+
+.document-status.ready {
+  color: #15803d;
+}
+
+
+.document-status.failed {
+  color: #dc2626;
+}
+
+
+.document-status.processing {
+  color: #64748b;
+}
+
+
+.document-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.document-status.ready .document-status-icon {
+  background: #dcfce7;
+}
+
+
+.document-status.failed .document-status-icon {
+  background: #fee2e2;
+}
+
+
+.document-metadata {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+
+.metadata-separator {
+  color: var(--text-muted);
+}
+
+
+.document-date {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+
+.document-processing-text {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+
+.document-card.processing {
+  border-style: dashed;
+}
+
+
+.document-card.failed {
+  border-color: #fecaca;
+}
+
+
+.document-card input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+
+.spinner.small {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+
+/* =========================================================
+   Responsive document metadata
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .document-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .document-metadata {
+    gap: 4px;
+  }
+
+}

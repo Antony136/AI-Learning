@@ -3,6 +3,23 @@ import { useState } from "react";
 import { uploadDocument } from "../services/api";
 
 
+function formatFileSize(bytes) {
+  if (!bytes) {
+    return "Size unavailable";
+  }
+
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+
 function UploadDocument({
   onUploadSuccess,
   setError
@@ -86,11 +103,12 @@ function UploadDocument({
         );
 
 
-      setUploadMessage(
-        `${data.filename} uploaded successfully. ` +
-        `${data.pages} pages and ` +
-        `${data.chunks} chunks processed.`
-      );
+        setUploadMessage(
+          `${data.filename} is ready. ` +
+          `${data.pages} pages, ` +
+          `${data.chunks} chunks, ` +
+          `${formatFileSize(data.file_size)}.`
+        );
 
 
       setSelectedFile(null);

@@ -1,6 +1,91 @@
 import { deleteDocument } from "../services/api";
 
 
+function formatFileSize(bytes) {
+  if (!bytes) {
+    return "Size unavailable";
+  }
+
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }
+  );
+}
+
+
+function getStageLabel(stage) {
+  const labels = {
+    extracting: "Extracting text",
+    chunking: "Creating chunks",
+    embedding: "Generating embeddings",
+    storing: "Storing in PostgreSQL",
+    ready: "Ready",
+    failed: "Processing failed"
+  };
+
+  return labels[stage] || "Processing";
+}
+
+
+function DocumentStatus({ document }) {
+  if (document.status === "ready") {
+    return (
+      <span className="document-status ready">
+        <span className="document-status-icon">
+          ✓
+        </span>
+        Ready
+      </span>
+    );
+  }
+
+  if (document.status === "failed") {
+    return (
+      <span className="document-status failed">
+        <span className="document-status-icon">
+          !
+        </span>
+        Failed
+      </span>
+    );
+  }
+
+  return (
+    <span className="document-status processing">
+      <span className="spinner small"></span>
+      {getStageLabel(document.stage)}
+    </span>
+  );
+}
+
+
 function DocumentList({
   documents,
   selectedDocuments,
@@ -22,14 +107,11 @@ function DocumentList({
       "This will remove the document and all of its stored chunks."
     );
 
-
     if (!confirmed) {
       return;
     }
 
-
     setError("");
-
 
     try {
 
@@ -37,19 +119,10 @@ function DocumentList({
         documentId
       );
 
-
-      /*
-       * Remove document from
-       * selected documents.
-       */
       onRemoveFromSelection(
         documentId
       );
 
-
-      /*
-       * Refresh document list.
-       */
       await onDocumentsChange();
 
     } catch (error) {
@@ -60,14 +133,16 @@ function DocumentList({
         error.message ||
         "Something went wrong while deleting the document."
       );
-
     }
   }
 
 
   return (
 
-    <section className="card" aria-labelledby="documents-heading">
+    <section
+      className="card"
+      aria-labelledby="documents-heading"
+    >
 
       <div className="section-header">
 
@@ -96,9 +171,7 @@ function DocumentList({
 
             <button
               className="clear-button"
-              onClick={
-                onClearSelection
-              }
+              onClick={onClearSelection}
             >
               Clear
             </button>
@@ -146,83 +219,153 @@ function DocumentList({
         ) : (
 
           documents.map(
-            (document) => (
+            (document) => {
 
-              <div
-                key={document.id}
-                className={`document-card ${
-                  selectedDocuments.includes(
-                    document.id
-                  )
-                    ? "selected"
-                    : ""
-                }`}
-              >
+              const isSelected =
+                selectedDocuments.includes(
+                  document.id
+                );
 
-                <label className="document-main">
+              return (
 
-                  <input
-                    type="checkbox"
-                    aria-label={`Select ${document.filename}`}
-                    checked={
-                      selectedDocuments.includes(
-                        document.id
-                      )
-                    }
-                    onChange={() =>
-                      onToggleDocument(
-                        document.id
-                      )
-                    }
-                  />
-
-
-                  <div className="document-icon">
-                    PDF
-                  </div>
-
-
-                  <div className="document-info">
-
-                    <strong>
-                      {document.filename}
-                    </strong>
-
-                    <span>
-                      {document.chunk_count} chunks
-                    </span>
-
-                  </div>
-
-
-                  <div className="document-check">
-
-                    {selectedDocuments.includes(
-                      document.id
-                    ) && "✓"}
-
-                  </div>
-
-                </label>
-
-
-                <button
-                  className="delete-button"
-                  aria-label={`Delete ${document.filename}`}
-                  onClick={() =>
-                    handleDelete(
-                      document.id,
-                      document.filename
-                    )
-                  }
-                  title="Delete document"
+                <div
+                  key={document.id}
+                  className={`document-card ${
+                    isSelected
+                      ? "selected"
+                      : ""
+                  } ${
+                    document.status === "processing"
+                      ? "processing"
+                      : ""
+                  } ${
+                    document.status === "failed"
+                      ? "failed"
+                      : ""
+                  }`}
                 >
-                  Delete
-                </button>
 
-              </div>
+                  <label className="document-main">
 
-            )
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${document.filename}`}
+                      checked={isSelected}
+                      onChange={() =>
+                        onToggleDocument(
+                          document.id
+                        )
+                      }
+                      disabled={
+                        document.status !== "ready"
+                      }
+                    />
+
+
+                    <div className="document-icon">
+                      PDF
+                    </div>
+
+
+                    <div className="document-info">
+
+                      <div className="document-title-row">
+
+                        <strong
+                          title={document.filename}
+                        >
+                          {document.filename}
+                        </strong>
+
+                        <DocumentStatus
+                          document={document}
+                        />
+
+                      </div>
+
+
+                      {document.status === "ready" ? (
+
+                        <div className="document-metadata">
+
+                          <span>
+                            {document.page_count ?? 0} pages
+                          </span>
+
+                          <span className="metadata-separator">
+                            •
+                          </span>
+
+                          <span>
+                            {document.chunk_count ?? 0} chunks
+                          </span>
+
+                          <span className="metadata-separator">
+                            •
+                          </span>
+
+                          <span>
+                            {formatFileSize(
+                              document.file_size
+                            )}
+                          </span>
+
+                        </div>
+
+                      ) : (
+
+                        <div className="document-processing-text">
+
+                          {getStageLabel(
+                            document.stage
+                          )}
+
+                        </div>
+
+                      )}
+
+
+                      {document.created_at && (
+
+                        <span className="document-date">
+                          Uploaded{" "}
+                          {formatDate(
+                            document.created_at
+                          )}
+                        </span>
+
+                      )}
+
+                    </div>
+
+
+                    <div className="document-check">
+
+                      {isSelected && "✓"}
+
+                    </div>
+
+                  </label>
+
+
+                  <button
+                    className="delete-button"
+                    aria-label={`Delete ${document.filename}`}
+                    onClick={() =>
+                      handleDelete(
+                        document.id,
+                        document.filename
+                      )
+                    }
+                    title="Delete document"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              );
+            }
           )
 
         )}
