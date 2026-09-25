@@ -1,5 +1,52 @@
+:root {
+  color-scheme: dark;
+
+  /* Custom Scrollbar Variables */
+  --scrollbar-width: 6px;
+  --scrollbar-track-bg: transparent;
+  --scrollbar-thumb-bg: rgba(255, 255, 255, 0.16);
+  --scrollbar-thumb-hover-bg: rgba(255, 255, 255, 0.32);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover-bg: rgba(0, 0, 0, 0.4);
+}
+
 * {
   box-sizing: border-box;
+
+  /* Firefox Scrollbar Styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+/* Chrome / WebKit / Edge Scrollbar Styling */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 html {
@@ -15,25 +62,22 @@ body {
   min-width: 320px;
   min-height: 100vh;
 
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--font-family, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: var(--base-font-size, 14px);
 
-  background: #0f1117;
-
-  color: #e5e7eb;
+  background: var(--app-background, #0f1117);
+  color: var(--text, #e5e7eb);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 button,
 textarea,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -44,8 +88,9 @@ button {
 button:focus-visible,
 textarea:focus-visible,
 input:focus-visible,
+select:focus-visible,
 label:focus-visible {
-  outline: 2px solid #8477e8;
+  outline: 2px solid var(--accent, #8477e8);
   outline-offset: 2px;
 }
 

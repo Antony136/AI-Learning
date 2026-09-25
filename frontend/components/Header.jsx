@@ -1,3 +1,5 @@
+import AppearanceMenu from "./AppearanceMenu";
+
 function Header() {
   return (
     <header className="header">
@@ -24,6 +26,8 @@ function Header() {
           </div>
 
         </div>
+
+        <AppearanceMenu />
 
       </div>
 

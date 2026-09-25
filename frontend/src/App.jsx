@@ -16,6 +16,8 @@ import {
   getChats,
   createChat,
   getChat,
+  renameChat,
+  deleteChat,
   askQuestion
 } from "../services/api";
 
@@ -355,7 +357,86 @@ function App() {
     );
   }
 
+  async function handleRenameChat(
+  chatId,
+  title
+) {
+  try {
+    setError("");
 
+    const updatedChat =
+      await renameChat(
+        chatId,
+        title
+      );
+
+    setChats((currentChats) =>
+      currentChats.map((chat) =>
+        chat.id === chatId
+          ? {
+              ...chat,
+              title: updatedChat.title
+            }
+          : chat
+      )
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    setError(
+      error.message ||
+      "Could not rename chat."
+    );
+
+    throw error;
+  }
+}
+
+
+async function handleDeleteChat(
+  chatId
+) {
+  try {
+    setError("");
+
+    await deleteChat(chatId);
+
+    const updatedChats =
+      chats.filter(
+        (chat) => chat.id !== chatId
+      );
+
+    setChats(updatedChats);
+
+
+    if (chatId === sessionId) {
+
+      if (updatedChats.length > 0) {
+
+        await loadChatSession(
+          updatedChats[0].id
+        );
+
+      } else {
+
+        await handleNewChat();
+
+      }
+
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    setError(
+      error.message ||
+      "Could not delete chat."
+    );
+
+    throw error;
+  }
+}
   /*
    * Load documents and chat when
    * the application starts.
@@ -572,6 +653,8 @@ function App() {
           currentSessionId={sessionId}
           onSelectChat={handleSelectChat}
           onNewChat={handleNewChat}
+          onRenameChat={handleRenameChat}
+          onDeleteChat={handleDeleteChat}
         />
 
         <div className="main-content">

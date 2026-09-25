@@ -191,3 +191,47 @@ def update_chat_title(
 
     finally:
         connection.close()
+
+def update_chat_title(
+    session_id: int,
+    title: str
+):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE chat_sessions
+                SET title = %s
+                WHERE id = %s
+                """,
+                (
+                    title,
+                    session_id
+                )
+            )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+
+def delete_chat_session(session_id: int):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                DELETE FROM chat_sessions
+                WHERE id = %s
+                """,
+                (session_id,)
+            )
+
+        connection.commit()
+
+    finally:
+        connection.close()

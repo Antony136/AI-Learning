@@ -126,6 +126,50 @@ export async function getChat(sessionId) {
   return data;
 }
 
+export async function renameChat(sessionId, title) {
+  const response = await fetch(
+    `${API_URL}/documents/chats/${sessionId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || `Could not rename chat (${response.status})`
+    );
+  }
+
+  return data;
+}
+
+
+export async function deleteChat(sessionId) {
+  const response = await fetch(
+    `${API_URL}/documents/chats/${sessionId}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.detail || `Could not delete chat (${response.status})`
+    );
+  }
+
+  return data;
+}
 
 /*
  * Ask a question using a persistent chat session.

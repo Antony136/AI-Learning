@@ -13,6 +13,7 @@ from app.storage.chats import (
     get_chat_messages,
     add_chat_message,
     update_chat_title,
+    delete_chat_session
 )
 
 from app.ingestion.pipeline import ingest_document
@@ -32,6 +33,8 @@ class ChatMessage(BaseModel):
     role: str
     content: str
 
+class RenameChatRequest(BaseModel):
+    title: str
 
 class QuestionRequest(BaseModel):
     question: str
@@ -282,6 +285,60 @@ def get_chat(session_id: int):
         "messages": messages
     }
 
+@router.patch("/chats/{session_id}")
+def rename_chat(
+    session_id: int,
+    request: RenameChatRequest
+):
+    session = get_chat_session(session_id)
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Chat session {session_id} not found"
+        )
+
+    title = request.title.strip()
+
+    if not title:
+        raise HTTPException(
+            status_code=400,
+            detail="Chat title cannot be empty"
+        )
+
+    if len(title) > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="Chat title cannot exceed 100 characters"
+        )
+
+    update_chat_title(
+        session_id=session_id,
+        title=title
+    )
+
+    return {
+        "id": session_id,
+        "title": title
+    }
+
+
+@router.delete("/chats/{session_id}")
+def delete_chat(session_id: int):
+    session = get_chat_session(session_id)
+
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Chat session {session_id} not found"
+        )
+
+    delete_chat_session(session_id)
+
+    return {
+        "message": "Chat deleted successfully",
+        "session_id": session_id
+    }
 
 @router.delete("/{document_id}")
 def delete_document(document_id: int):
