@@ -98,7 +98,49 @@ def update_document_status(
 
     finally:
         connection.close()
-         
+
+def get_document_status(document_id: int):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    filename,
+                    file_size,
+                    page_count,
+                    chunk_count,
+                    status,
+                    stage,
+                    created_at
+                FROM documents
+                WHERE id = %s
+                """,
+                (document_id,)
+            )
+
+            row = cursor.fetchone()
+
+            if not row:
+                return None
+
+            return {
+                "id": row[0],
+                "filename": row[1],
+                "file_size": row[2],
+                "page_count": row[3],
+                "chunk_count": row[4],
+                "status": row[5],
+                "stage": row[6],
+                "created_at": row[7]
+            }
+
+    finally:
+        connection.close()
+
+        
 def insert_chunk(
     document_id: int,
     source: str,

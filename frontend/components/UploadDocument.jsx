@@ -20,6 +20,146 @@ function formatFileSize(bytes) {
 }
 
 
+function getStageLabel(stage) {
+  const labels = {
+    extracting: "Extracting text",
+    chunking: "Creating chunks",
+    embedding: "Generating embeddings",
+    storing: "Storing in PostgreSQL",
+    ready: "Ready",
+    failed: "Processing failed"
+  };
+
+  return labels[stage] || "Processing";
+}
+
+
+function getStageDescription(stage) {
+  const descriptions = {
+    extracting:
+      "Reading the text and page structure from your PDF.",
+
+    chunking:
+      "Breaking the document into searchable sections.",
+
+    embedding:
+      "Converting document chunks into semantic vectors.",
+
+    storing:
+      "Saving the chunks and embeddings for retrieval.",
+
+    ready:
+      "Your document is ready for questions.",
+
+    failed:
+      "Something went wrong while processing the document."
+  };
+
+  return (
+    descriptions[stage] ||
+    "Processing your document."
+  );
+}
+
+
+function getProgressPercentage(
+  stage,
+  current,
+  total
+) {
+  if (stage === "ready") {
+    return 100;
+  }
+
+  if (!total || total <= 0) {
+    return 0;
+  }
+
+  const stageProgress =
+    Math.min(
+      current / total,
+      1
+    );
+
+  const stageRanges = {
+    extracting: {
+      start: 0,
+      end: 15
+    },
+
+    chunking: {
+      start: 15,
+      end: 30
+    },
+
+    embedding: {
+      start: 30,
+      end: 75
+    },
+
+    storing: {
+      start: 75,
+      end: 100
+    }
+  };
+
+  const range =
+    stageRanges[stage];
+
+  if (!range) {
+    return 0;
+  }
+
+  return (
+    range.start +
+    (
+      (range.end - range.start) *
+      stageProgress
+    )
+  );
+}
+
+
+const stages = [
+  "extracting",
+  "chunking",
+  "embedding",
+  "storing"
+];
+
+
+function getStageState(
+  stage,
+  currentStage
+) {
+  const currentIndex =
+    stages.indexOf(currentStage);
+
+  const stageIndex =
+    stages.indexOf(stage);
+
+  if (currentStage === "ready") {
+    return "completed";
+  }
+
+  if (currentStage === "failed") {
+    return stage === currentStage
+      ? "failed"
+      : "pending";
+  }
+
+  if (stageIndex < currentIndex) {
+    return "completed";
+  }
+
+  if (stage === currentStage) {
+    return "active";
+  }
+
+  return "pending";
+}
+
+
 function UploadDocument({
   onUploadSuccess,
   setError
@@ -33,6 +173,15 @@ function UploadDocument({
 
   const [uploadMessage, setUploadMessage] =
     useState("");
+
+  const [uploadStage, setUploadStage] =
+    useState("");
+
+  const [uploadCurrent, setUploadCurrent] =
+    useState(0);
+
+  const [uploadTotal, setUploadTotal] =
+    useState(0);
 
 
   function handleFileChange(event) {
@@ -94,21 +243,54 @@ function UploadDocument({
 
     setUploadMessage("");
 
+    setUploadStage("extracting");
+
+    setUploadCurrent(0);
+
+    setUploadTotal(0);
+
 
     try {
 
-      const data =
-        await uploadDocument(
-          selectedFile
-        );
+      const data = await uploadDocument(
+        selectedFile,
+        (
+          stage,
+          current,
+          total
+        ) => {
+
+          setUploadStage(stage);
+
+          setUploadCurrent(
+            current || 0
+          );
+
+          setUploadTotal(
+            total || 0
+          );
+
+        }
+      );
 
 
-        setUploadMessage(
-          `${data.filename} is ready. ` +
-          `${data.pages} pages, ` +
-          `${data.chunks} chunks, ` +
-          `${formatFileSize(data.file_size)}.`
-        );
+      setUploadStage("ready");
+
+      setUploadCurrent(
+        data.chunks || 0
+      );
+
+      setUploadTotal(
+        data.chunks || 0
+      );
+
+
+      setUploadMessage(
+        `${data.filename} is ready. ` +
+        `${data.pages} pages, ` +
+        `${data.chunks} chunks, ` +
+        `${formatFileSize(data.file_size)}.`
+      );
 
 
       setSelectedFile(null);
@@ -121,21 +303,19 @@ function UploadDocument({
 
 
       if (fileInput) {
-
         fileInput.value = "";
-
       }
 
 
       if (onUploadSuccess) {
-
         await onUploadSuccess();
-
       }
 
     } catch (error) {
 
       console.error(error);
+
+      setUploadStage("failed");
 
       setError(
         error.message ||
@@ -148,6 +328,14 @@ function UploadDocument({
 
     }
   }
+
+
+  const progressPercentage =
+    getProgressPercentage(
+      uploadStage,
+      uploadCurrent,
+      uploadTotal
+    );
 
 
   return (
@@ -216,23 +404,15 @@ function UploadDocument({
           >
 
             {uploading ? (
-
               <>
                 <span className="spinner"></span>
-
-                Processing...
+                Processing
               </>
-
             ) : (
-
               <>
                 Upload PDF
-
-                <span>
-                  ↑
-                </span>
+                <span>↑</span>
               </>
-
             )}
 
           </button>
@@ -240,9 +420,122 @@ function UploadDocument({
         </div>
 
 
+        {uploading && uploadStage && (
+
+          <div
+            className="upload-progress-panel"
+            role="status"
+            aria-live="polite"
+          >
+
+            <div className="upload-progress-top">
+
+              <div>
+
+                <strong>
+                  Processing document
+                </strong>
+
+                <p>
+                  {getStageDescription(
+                    uploadStage
+                  )}
+                </p>
+
+              </div>
+
+
+              <span className="upload-progress-percent">
+                {Math.round(
+                  progressPercentage
+                )}%
+              </span>
+
+            </div>
+
+
+            <div className="upload-progress-track">
+
+              <div
+                className="upload-progress-bar"
+                style={{
+                  width: `${progressPercentage}%`
+                }}
+              />
+
+            </div>
+
+
+            <div className="upload-stage-list">
+
+              {stages.map(
+                (stage) => {
+
+                  const state =
+                    getStageState(
+                      stage,
+                      uploadStage
+                    );
+
+                  return (
+
+                    <div
+                      key={stage}
+                      className={`upload-stage ${state}`}
+                    >
+
+                      <span className="upload-stage-indicator">
+
+                        {state === "completed" && "✓"}
+
+                        {state === "active" && (
+                          <span className="spinner tiny"></span>
+                        )}
+
+                      </span>
+
+
+                      <span className="upload-stage-name">
+                        {getStageLabel(stage)}
+                      </span>
+
+
+                      {state === "active" &&
+                        uploadTotal > 0 && (
+
+                          <span className="upload-stage-count">
+
+                            {uploadCurrent} /{" "}
+                            {uploadTotal}
+
+                            {stage === "chunking"
+                              ? " pages"
+                              : " chunks"}
+
+                          </span>
+
+                        )}
+
+                    </div>
+
+                  );
+                }
+              )}
+
+            </div>
+
+          </div>
+
+        )}
+
+
         {uploadMessage && (
 
-          <div className="success-message" role="status" aria-live="polite">
+          <div
+            className="success-message"
+            role="status"
+            aria-live="polite"
+          >
 
             <div className="success-icon">
               ✓

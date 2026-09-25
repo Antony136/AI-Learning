@@ -6,13 +6,13 @@ from app.ingestion.embeddings import generate_embedding
 from app.storage.chunks import (
     create_document,
     insert_chunk,
-    update_document_metadata,
-    update_document_status
+    update_document_metadata
 )
 
 
 def ingest_document(
     pdf_path: str,
+    on_progress=None,
     chunk_size: int = 1000,
     overlap_sentences: int = 1
 ):
@@ -27,29 +27,48 @@ def ingest_document(
 
     try:
 
-        # Stage 1
-        update_document_status(
-            document_id=document_id,
-            status="processing",
-            stage="extracting"
-        )
+        # ---------------------------------------------------------
+        # Stage 1: Extract text
+        # ---------------------------------------------------------
+
+        if on_progress:
+            on_progress(
+                "extracting",
+                0,
+                0
+            )
 
         pages = extract_pages(
             pdf_path
         )
 
-        # Stage 2
-        update_document_status(
-            document_id=document_id,
-            status="processing",
-            stage="chunking"
-        )
+
+        if on_progress:
+            on_progress(
+                "extracting",
+                len(pages),
+                len(pages)
+            )
+
+
+        # ---------------------------------------------------------
+        # Stage 2: Create chunks
+        # ---------------------------------------------------------
+
+        if on_progress:
+            on_progress(
+                "chunking",
+                0,
+                len(pages)
+            )
 
         page_chunks = []
-
         total_chunks = 0
 
-        for page_data in pages:
+        for page_index, page_data in enumerate(
+            pages,
+            start=1
+        ):
 
             page_number = page_data["page"]
             page_text = page_data["text"]
@@ -61,22 +80,34 @@ def ingest_document(
             )
 
             page_chunks.append(
-                (
-                    page_number,
-                    chunks
-                )
+                (page_number, chunks)
             )
 
             total_chunks += len(chunks)
 
-        # Stage 3
-        update_document_status(
-            document_id=document_id,
-            status="processing",
-            stage="embedding"
-        )
+
+            if on_progress:
+                on_progress(
+                    "chunking",
+                    page_index,
+                    len(pages)
+                )
+
+
+        # ---------------------------------------------------------
+        # Stage 3: Generate embeddings
+        # ---------------------------------------------------------
+
+        if on_progress:
+            on_progress(
+                "embedding",
+                0,
+                total_chunks
+            )
 
         embedded_chunks = []
+
+        completed_embeddings = 0
 
         for page_number, chunks in page_chunks:
 
@@ -89,21 +120,36 @@ def ingest_document(
                     chunk
                 )
 
-                embedded_chunks.append(
-                    {
-                        "page": page_number,
-                        "chunk_index": chunk_index,
-                        "content": chunk,
-                        "embedding": embedding
-                    }
-                )
+                embedded_chunks.append({
+                    "page": page_number,
+                    "chunk_index": chunk_index,
+                    "content": chunk,
+                    "embedding": embedding
+                })
 
-        # Stage 4
-        update_document_status(
-            document_id=document_id,
-            status="processing",
-            stage="storing"
-        )
+                completed_embeddings += 1
+
+
+                if on_progress:
+                    on_progress(
+                        "embedding",
+                        completed_embeddings,
+                        total_chunks
+                    )
+
+
+        # ---------------------------------------------------------
+        # Stage 4: Store chunks
+        # ---------------------------------------------------------
+
+        if on_progress:
+            on_progress(
+                "storing",
+                0,
+                total_chunks
+            )
+
+        completed_storage = 0
 
         for chunk in embedded_chunks:
 
@@ -116,7 +162,21 @@ def ingest_document(
                 embedding=chunk["embedding"]
             )
 
-        # Stage 5
+            completed_storage += 1
+
+
+            if on_progress:
+                on_progress(
+                    "storing",
+                    completed_storage,
+                    total_chunks
+                )
+
+
+        # ---------------------------------------------------------
+        # Stage 5: Complete
+        # ---------------------------------------------------------
+
         update_document_metadata(
             document_id=document_id,
             page_count=len(pages),
@@ -124,6 +184,15 @@ def ingest_document(
             status="ready",
             stage="ready"
         )
+
+
+        if on_progress:
+            on_progress(
+                "ready",
+                total_chunks,
+                total_chunks
+            )
+
 
         return {
             "document_id": document_id,
@@ -135,17 +204,27 @@ def ingest_document(
             "stage": "ready"
         }
 
+
     except Exception:
 
-        update_document_status(
+        update_document_metadata(
             document_id=document_id,
+            page_count=0,
+            chunk_count=0,
             status="failed",
             stage="failed"
         )
 
+        if on_progress:
+            on_progress(
+                "failed",
+                0,
+                0
+            )
+
         raise
 
-    
+
 if __name__ == "__main__":
 
     result = ingest_document(

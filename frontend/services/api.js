@@ -16,10 +16,17 @@ export async function getDocuments() {
 }
 
 
-export async function uploadDocument(file) {
+export async function uploadDocument(
+  file,
+  onStage
+) {
   const formData = new FormData();
 
-  formData.append("file", file);
+  formData.append(
+    "file",
+    file
+  );
+
 
   const response = await fetch(
     `${API_URL}/documents/upload`,
@@ -29,18 +36,208 @@ export async function uploadDocument(file) {
     }
   );
 
-  const data = await response.json();
 
+  /*
+   * Handle normal HTTP errors
+   * before attempting to read the stream.
+   */
   if (!response.ok) {
+
+    let message =
+      "Could not upload document.";
+
+    try {
+
+      const data =
+        await response.json();
+
+      message =
+        data.detail ||
+        message;
+
+    } catch {
+      // Keep default message.
+    }
+
     throw new Error(
-      data.detail ||
-      `Upload failed (${response.status})`
+      message
     );
   }
 
-  return data;
-}
 
+  /*
+   * The backend sends NDJSON progress
+   * events through a streaming response.
+   */
+  if (!response.body) {
+
+    throw new Error(
+      "Upload streaming is not supported by this browser."
+    );
+  }
+
+
+  const reader =
+    response.body.getReader();
+
+  const decoder =
+    new TextDecoder();
+
+
+  let buffer = "";
+
+
+  /*
+   * Read the upload/processing stream.
+   */
+  while (true) {
+
+    const {
+      value,
+      done
+    } = await reader.read();
+
+
+    if (done) {
+      break;
+    }
+
+
+    buffer += decoder.decode(
+      value,
+      {
+        stream: true
+      }
+    );
+
+
+    const lines =
+      buffer.split("\n");
+
+
+    /*
+     * Keep the incomplete final line
+     * for the next network chunk.
+     */
+    buffer =
+      lines.pop() || "";
+
+
+    for (const line of lines) {
+
+      if (!line.trim()) {
+        continue;
+      }
+
+
+      const event =
+        JSON.parse(line);
+
+
+      /*
+       * Example:
+       * {"type":"stage","stage":"embedding"}
+       */
+      if (event.type === "progress") {
+
+        if (onStage) {
+          onStage(
+            event.stage,
+            event.current,
+            event.total
+          );
+        }
+
+      }
+
+
+      /*
+       * Example:
+       * {
+       *   "type": "complete",
+       *   "document": {...}
+       * }
+       */
+      else if (
+        event.type === "complete"
+      ) {
+
+        return event.document;
+
+      }
+
+
+      /*
+       * Example:
+       * {
+       *   "type": "error",
+       *   "content": "..."
+       * }
+       */
+      else if (
+        event.type === "error"
+      ) {
+
+        throw new Error(
+          event.content ||
+          "Document processing failed."
+        );
+
+      }
+
+    }
+
+  }
+
+
+  /*
+   * Flush any remaining decoder data.
+   */
+  buffer +=
+    decoder.decode();
+
+
+  /*
+   * Process a final event if one
+   * remained in the buffer.
+   */
+  if (buffer.trim()) {
+
+    const event =
+      JSON.parse(buffer);
+
+
+    if (
+      event.type === "complete"
+    ) {
+
+      return event.document;
+
+    }
+
+
+    if (
+      event.type === "error"
+    ) {
+
+      throw new Error(
+        event.content ||
+        "Document processing failed."
+      );
+
+    }
+
+  }
+
+
+  /*
+   * The backend ended the stream without
+   * telling us that processing completed.
+   */
+  throw new Error(
+    "Upload ended without a completion event."
+  );
+}
 
 export async function deleteDocument(documentId) {
   const response = await fetch(

@@ -1,4 +1,6 @@
 import json
+import queue
+import threading
 from pathlib import Path
 
 from fastapi import APIRouter, File, UploadFile, HTTPException
@@ -6,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.storage.documents import get_documents, get_document
+from app.storage.chunks import get_document_status
 from app.storage.chats import (
     create_chat_session,
     get_chat_session,
@@ -47,10 +50,24 @@ def list_documents():
     return get_documents()
 
 
+@router.get("/{document_id}/status")
+def document_status(document_id: int):
+
+    document = get_document_status(
+        document_id
+    )
+
+    if not document:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found."
+        )
+
+    return document
+
+
 @router.post("/upload")
-async def upload_document(
-    file: UploadFile = File(...)
-):
+async def upload_document(file: UploadFile = File(...)):
 
     if not file.filename:
         raise HTTPException(
@@ -75,17 +92,14 @@ async def upload_document(
 
         contents = await file.read()
 
-        with open(file_path, "wb") as output_file:
-            output_file.write(contents)
+        with open(
+            file_path,
+            "wb"
+        ) as output_file:
 
-        result = ingest_document(
-            str(file_path)
-        )
-
-        return {
-            "message": "Document uploaded and ingested successfully",
-            **result
-        }
+            output_file.write(
+                contents
+            )
 
     except Exception as error:
 
@@ -96,6 +110,108 @@ async def upload_document(
             status_code=500,
             detail=str(error)
         )
+
+
+    def stream_upload():
+
+        progress_queue = queue.Queue()
+
+        def on_progress(stage, current=0, total=0):
+            progress_queue.put(
+                {
+                    "type": "progress",
+                    "stage": stage,
+                    "current": current,
+                    "total": total
+                }
+            )
+
+
+        result_container = {
+            "result": None,
+            "error": None
+        }
+
+
+        def run_ingestion():
+
+            try:
+
+                result_container["result"] = (
+                    ingest_document(
+                        str(file_path),
+                        on_progress=on_progress
+                    )
+                )
+
+            except Exception as error:
+
+                result_container["error"] = error
+
+            finally:
+
+                progress_queue.put(
+                    None
+                )
+
+
+        thread = threading.Thread(
+            target=run_ingestion,
+            daemon=True
+        )
+
+        thread.start()
+
+
+        while True:
+
+            event = progress_queue.get()
+
+            if event is None:
+                break
+
+            yield (
+                json.dumps(event)
+                + "\n"
+            )
+
+
+        if result_container["error"]:
+
+            yield (
+                json.dumps(
+                    {
+                        "type": "error",
+                        "content": str(
+                            result_container["error"]
+                        )
+                    }
+                )
+                + "\n"
+            )
+
+        else:
+
+            yield (
+                json.dumps(
+                    {
+                        "type": "complete",
+                        "document":
+                            result_container["result"]
+                    }
+                )
+                + "\n"
+            )
+
+
+        if file_path.exists():
+            file_path.unlink()
+
+
+    return StreamingResponse(
+        stream_upload(),
+        media_type="application/x-ndjson"
+    )
 
 
 @router.post("/ask")
