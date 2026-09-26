@@ -2,7 +2,7 @@ from experiments.evaluation_dataset import evaluation_dataset
 from app.retrieval.multi_query import multi_query_retrieve
 from app.retrieval.reranker import rerank
 
-DOCUMENT_ID = 2
+DOCUMENT_ID = 37
 
 
 def is_relevant(result, relevant_chunks):

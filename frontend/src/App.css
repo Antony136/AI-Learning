@@ -889,3 +889,280 @@ label:focus-visible {
     opacity: 1;
   }
 }
+
+/* =========================================================
+   VISUALIZATION DIALOG
+   ========================================================= */
+
+.visualization-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(0, 0, 0, 0.72);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  animation: visualizationBackdropIn 0.18s ease-out;
+}
+
+.visualization-dialog {
+  width: min(1500px, 96vw);
+  max-height: 94vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 8px 30px rgba(0, 0, 0, 0.25);
+
+  animation: visualizationDialogIn 0.2s ease-out;
+}
+
+.visualization-dialog-header {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 18px 22px;
+
+  background: var(--surface-muted);
+
+  border-bottom: 1px solid var(--border);
+}
+
+.visualization-dialog-header h2 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.visualization-dialog-header p {
+  margin: 5px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.visualization-dialog-close {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--surface);
+  color: var(--text-muted);
+
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.visualization-dialog-close:hover {
+  background: var(--surface-input);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.visualization-dialog-content {
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 18px;
+
+  scrollbar-width: thin;
+}
+
+.visualization-dialog-content .embedding-space {
+  margin: 0;
+}
+
+
+/* =========================================================
+   DOCUMENT VISUALIZATION BUTTON
+   ========================================================= */
+
+.documents-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  flex-wrap: wrap;
+}
+
+.visualize-documents-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 8px 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--surface-muted);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.visualize-documents-button:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.visualize-documents-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.visualize-documents-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   VISUALIZATION ANIMATIONS
+   ========================================================= */
+
+@keyframes visualizationBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes visualizationDialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* =========================================================
+   VISUALIZATION RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .visualization-dialog-backdrop {
+    padding: 12px;
+  }
+
+  .visualization-dialog {
+    width: 100%;
+    max-height: 96vh;
+    border-radius: 12px;
+  }
+
+  .visualization-dialog-header {
+    padding: 15px 16px;
+  }
+
+  .visualization-dialog-content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+  .visualization-dialog-backdrop {
+    padding: 0;
+  }
+
+  .visualization-dialog {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .visualization-dialog-header {
+    padding: 14px;
+  }
+
+  .visualization-dialog-header h2 {
+    font-size: 16px;
+  }
+
+  .visualization-dialog-header p {
+    font-size: 12px;
+  }
+
+  .visualization-dialog-content {
+    padding: 8px;
+  }
+
+  .documents-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .visualize-documents-button {
+    flex: 1;
+  }
+}

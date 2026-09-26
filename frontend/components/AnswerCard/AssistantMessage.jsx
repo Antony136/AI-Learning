@@ -32,7 +32,9 @@ function CodeBlock({
 
 function AssistantMessage({
   content,
-  sources
+  sources,
+  question,
+  onVisualize
 }) {
   const contentRef = useRef(null);
 
@@ -43,6 +45,10 @@ function AssistantMessage({
     sources &&
     Array.isArray(sources) &&
     sources.length > 0;
+
+  const hasQuestion =
+    typeof question === "string" &&
+    question.trim().length > 0;
 
   return (
     <div className="chat-message assistant">
@@ -133,6 +139,23 @@ function AssistantMessage({
                 {showSources
                   ? "Hide Sources"
                   : `${sources.length} Sources Used`}
+              </span>
+            </button>
+          )}
+
+          {hasQuestion && (
+            <button
+              type="button"
+              className="message-visualize-button"
+              onClick={() =>
+                onVisualize?.(question)
+              }
+              title="Visualize this question and its retrieved chunks"
+            >
+              <span>🔬</span>
+
+              <span>
+                Visualize
               </span>
             </button>
           )}

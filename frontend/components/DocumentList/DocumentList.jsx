@@ -1,6 +1,7 @@
 import { deleteDocument } from "../../services/api";
 import "./DocumentList.css";
 
+
 function formatFileSize(bytes) {
   if (!bytes) {
     return "Size unavailable";
@@ -94,7 +95,8 @@ function DocumentList({
   onDocumentsChange,
   onRemoveFromSelection,
   setError,
-  loading
+  loading,
+  onVisualizeDocuments
 }) {
 
   async function handleDelete(
@@ -137,6 +139,13 @@ function DocumentList({
   }
 
 
+  const hasReadyDocuments =
+    documents.some(
+      (document) =>
+        document.status === "ready"
+    );
+
+
   return (
 
     <section
@@ -160,23 +169,43 @@ function DocumentList({
         </div>
 
 
-        <div className="selection-info">
+        <div className="documents-header-actions">
 
-          <span>
-            {selectedDocuments.length} selected
-          </span>
+          <button
+            type="button"
+            className="visualize-documents-button"
+            onClick={onVisualizeDocuments}
+            disabled={
+              loading ||
+              !hasReadyDocuments
+            }
+            title="Explore document embeddings"
+          >
+            <span>🔬</span>
+            <span>Visualize Documents</span>
+          </button>
 
 
-          {selectedDocuments.length > 0 && (
+          <div className="selection-info">
 
-            <button
-              className="clear-button"
-              onClick={onClearSelection}
-            >
-              Clear
-            </button>
+            <span>
+              {selectedDocuments.length} selected
+            </span>
 
-          )}
+
+            {selectedDocuments.length > 0 && (
+
+              <button
+                type="button"
+                className="clear-button"
+                onClick={onClearSelection}
+              >
+                Clear
+              </button>
+
+            )}
+
+          </div>
 
         </div>
 
@@ -349,6 +378,7 @@ function DocumentList({
 
 
                   <button
+                    type="button"
                     className="delete-button"
                     aria-label={`Delete ${document.filename}`}
                     onClick={() =>

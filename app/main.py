@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.documents import router as documents_router
-
+from app.api.visualization import router as visualization_router
 
 app = FastAPI()
 
@@ -33,4 +33,8 @@ app.add_middleware(
 
 app.include_router(
     documents_router
+)
+
+app.include_router(
+    visualization_router
 )

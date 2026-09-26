@@ -674,3 +674,70 @@ export async function askQuestion(
     sources
   };
 }
+
+export async function getEmbeddingPoints(documentIds = null) {
+    let url = `${API_URL}/visualization/embeddings`;
+
+    if (documentIds && documentIds.length > 0) {
+        const params = new URLSearchParams();
+
+        documentIds.forEach((id) => {
+            params.append("document_ids", id);
+        });
+
+        url += `?${params.toString()}`;
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            "Failed to load embedding visualization data."
+        );
+    }
+
+    return response.json();
+}
+
+export async function getQueryVisualization(
+    question,
+    documentIds = null,
+    retrievalTopK = 5
+) {
+    const params = new URLSearchParams();
+
+    params.append(
+        "question",
+        question
+    );
+
+    params.append(
+        "retrieval_top_k",
+        retrievalTopK
+    );
+
+    if (
+        documentIds &&
+        documentIds.length > 0
+    ) {
+        documentIds.forEach((id) => {
+            params.append(
+                "document_ids",
+                id
+            );
+        });
+    }
+
+    const url =
+        `${API_URL}/visualization/query?${params.toString()}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            "Failed to load query visualization data."
+        );
+    }
+
+    return response.json();
+}

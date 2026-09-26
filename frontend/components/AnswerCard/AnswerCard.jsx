@@ -9,7 +9,8 @@ function AnswerCard({
   pendingQuestion,
   loading,
   sources,
-  onClear
+  onClear,
+  onVisualize
 }) {
   const messagesEndRef = useRef(null);
 
@@ -18,6 +19,24 @@ function AnswerCard({
     !pendingQuestion &&
     !loading &&
     !answer;
+
+  function getQuestionForAssistant(
+    assistantIndex
+  ) {
+    for (
+      let index = assistantIndex - 1;
+      index >= 0;
+      index -= 1
+    ) {
+      if (
+        conversation[index].role === "user"
+      ) {
+        return conversation[index].content;
+      }
+    }
+
+    return null;
+  }
 
   return (
     <section className="card answer-card chat-card">
@@ -36,7 +55,9 @@ function AnswerCard({
             className="jump-to-ask-button"
             onClick={() => {
               document
-                .getElementById("question-box-card")
+                .getElementById(
+                  "question-box-card"
+                )
                 ?.scrollIntoView({
                   behavior: "smooth"
                 });
@@ -79,28 +100,35 @@ function AnswerCard({
             </p>
           </div>
         ) : (
-          conversation.map((message, index) => (
-            message.role === "assistant" ? (
-              <AssistantMessage
-                key={`${message.role}-${index}`}
-                content={message.content}
-                sources={message.sources}
-              />
-            ) : (
-              <div
-                key={`${message.role}-${index}`}
-                className="chat-message user"
-              >
-                <span className="message-label">
-                  You
-                </span>
+          conversation.map(
+            (message, index) =>
+              message.role === "assistant" ? (
+                <AssistantMessage
+                  key={`${message.role}-${index}`}
+                  content={message.content}
+                  sources={message.sources}
+                  question={getQuestionForAssistant(
+                    index
+                  )}
+                  onVisualize={onVisualize}
+                />
+              ) : (
+                <div
+                  key={`${message.role}-${index}`}
+                  className="chat-message user"
+                >
+                  <span className="message-label">
+                    You
+                  </span>
 
-                <div className="message-content">
-                  <p>{message.content}</p>
+                  <div className="message-content">
+                    <p>
+                      {message.content}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )
-          ))
+              )
+          )
         )}
 
         {pendingQuestion && (
@@ -135,6 +163,8 @@ function AnswerCard({
           <AssistantMessage
             content={answer}
             sources={sources}
+            question={pendingQuestion}
+            onVisualize={onVisualize}
           />
         )}
 
@@ -143,6 +173,5 @@ function AnswerCard({
     </section>
   );
 }
-
 
 export default AnswerCard;
