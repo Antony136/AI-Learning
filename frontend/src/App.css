@@ -6,11 +6,9 @@
   color-scheme: dark;
 
   --app-background: #0f1117;
-
   --surface: #181d27;
   --surface-muted: #151923;
   --surface-input: #10141c;
-
   --border: #2a3140;
   --border-strong: #3a4353;
 
@@ -21,6 +19,18 @@
   --accent: #7567d9;
   --accent-hover: #8477e8;
   --accent-soft: rgba(117, 103, 217, 0.14);
+
+  /* Visualization theme */
+  --chart-point: #a5b4fc;
+  --chart-point-stroke: #1e1b4b;
+  --chart-point-hover: #fbbf24;
+  --chart-point-selected: #f59e0b;
+  --chart-point-selected-stroke: #ffffff;
+  --chart-query: #f97316;
+  --chart-query-stroke: #ffffff;
+  --chart-tooltip-bg: #111827;
+  --chart-tooltip-text: #f9fafb;
+  --chart-tooltip-border: #374151;
 
   --radius: 10px;
 
@@ -40,11 +50,9 @@
   color-scheme: light;
 
   --app-background: #f8fafc;
-
   --surface: #ffffff;
   --surface-muted: #f1f5f9;
   --surface-input: #e2e8f0;
-
   --border: #cbd5e1;
   --border-strong: #94a3b8;
 
@@ -55,17 +63,27 @@
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --accent-soft: rgba(99, 102, 241, 0.12);
+
+  /* Visualization theme */
+  --chart-point: #4f46e5;
+  --chart-point-stroke: #ffffff;
+  --chart-point-hover: #d97706;
+  --chart-point-selected: #f59e0b;
+  --chart-point-selected-stroke: #111827;
+  --chart-query: #ea580c;
+  --chart-query-stroke: #ffffff;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-text: #0f172a;
+  --chart-tooltip-border: #cbd5e1;
 }
 
 [data-theme="midnight"] {
   color-scheme: dark;
 
   --app-background: #090d16;
-
   --surface: #0e1726;
   --surface-muted: #0b121e;
   --surface-input: #060a12;
-
   --border: #1e293b;
   --border-strong: #334155;
 
@@ -76,6 +94,18 @@
   --accent: #38bdf8;
   --accent-hover: #0ea5e9;
   --accent-soft: rgba(56, 189, 248, 0.15);
+
+  /* Visualization theme */
+  --chart-point: #7dd3fc;
+  --chart-point-stroke: #082f49;
+  --chart-point-hover: #fbbf24;
+  --chart-point-selected: #f59e0b;
+  --chart-point-selected-stroke: #ffffff;
+  --chart-query: #fb923c;
+  --chart-query-stroke: #ffffff;
+  --chart-tooltip-bg: #0f172a;
+  --chart-tooltip-text: #f8fafc;
+  --chart-tooltip-border: #334155;
 }
 
 [data-text-size="small"] {
@@ -121,17 +151,14 @@
     monospace;
 }
 
-
 /* =========================================================
    APP
    ========================================================= */
 
 .app {
   height: 100vh;
-
   display: flex;
   flex-direction: column;
-
   overflow: hidden;
 
   background: var(--app-background);
@@ -144,7 +171,6 @@
     background-color 0.2s ease,
     color 0.2s ease;
 }
-
 
 /* =========================================================
    HEADER
@@ -163,21 +189,18 @@
 
 .header-content {
   width: min(1400px, calc(100% - 48px));
-
   margin: 0 auto;
   padding: 16px 0;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 20px;
 }
 
 .logo-area {
   display: flex;
   align-items: center;
-
   gap: 16px;
 }
 
@@ -217,7 +240,6 @@
   font-size: 0.9rem;
 }
 
-
 /* =========================================================
    APPEARANCE MENU
    ========================================================= */
@@ -229,7 +251,6 @@
 .appearance-toggle-button {
   display: flex;
   align-items: center;
-
   gap: 8px;
 
   padding: 8px 14px;
@@ -263,14 +284,11 @@
 
 .appearance-dropdown-menu {
   position: absolute;
-
   top: calc(100% + 8px);
   right: 0;
-
   z-index: 50;
 
   width: 280px;
-
   padding: 16px;
 
   border: 1px solid var(--border-strong);
@@ -343,7 +361,6 @@
 
 .appearance-button-group {
   display: flex;
-
   gap: 6px;
 }
 
@@ -370,21 +387,16 @@
 
 .appearance-option-btn:hover {
   background: var(--surface-input);
-
   color: var(--text);
-
   border-color: var(--border-strong);
 }
 
 .appearance-option-btn.active {
   background: var(--accent);
   color: #ffffff;
-
   border-color: var(--accent);
-
   font-weight: 600;
 }
-
 
 /* =========================================================
    MAIN APPLICATION LAYOUT
@@ -392,7 +404,6 @@
 
 .app-layout {
   flex: 1;
-
   min-height: 0;
 
   width: 100%;
@@ -402,9 +413,7 @@
   padding: 20px 24px;
 
   display: grid;
-
   grid-template-columns: 270px minmax(0, 1fr);
-
   gap: 24px;
 
   align-items: stretch;
@@ -414,12 +423,10 @@
 
 .main-content {
   height: 100%;
-
   min-width: 0;
 
   display: flex;
   flex-direction: column;
-
   gap: 20px;
 
   overflow-y: auto;
@@ -436,7 +443,6 @@
   display: none;
 }
 
-
 /* =========================================================
    MAIN CONTAINER
    ========================================================= */
@@ -448,10 +454,8 @@
 
   display: flex;
   flex-direction: column;
-
   gap: 20px;
 }
-
 
 /* =========================================================
    CARD
@@ -469,7 +473,6 @@
 
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
 }
-
 
 /* =========================================================
    SECTION HEADER
@@ -504,7 +507,6 @@
   line-height: 1.5;
 }
 
-
 /* =========================================================
    SELECTION INFO
    ========================================================= */
@@ -512,7 +514,6 @@
 .selection-info {
   display: flex;
   align-items: center;
-
   gap: 12px;
 }
 
@@ -530,7 +531,6 @@
 
 .clear-button {
   border: none;
-
   background: transparent;
 
   color: var(--text-muted);
@@ -538,7 +538,6 @@
   font-size: 13px;
 
   cursor: pointer;
-
   padding: 5px;
 }
 
@@ -546,20 +545,17 @@
   color: var(--text);
 }
 
-
 /* =========================================================
    QUESTION
    ========================================================= */
 
 textarea {
   width: 100%;
-
   min-height: 130px;
 
   resize: vertical;
 
   padding: 15px;
-
   box-sizing: border-box;
 
   border: 1px solid var(--border);
@@ -592,7 +588,6 @@ textarea:focus {
 
 textarea:disabled {
   background: var(--surface-muted);
-
   cursor: not-allowed;
 }
 
@@ -609,12 +604,12 @@ textarea:disabled {
 
 .selection-hint {
   color: var(--text-muted);
-
   font-size: 13px;
 }
 
 .ask-button {
   display: flex;
+
   align-items: center;
   justify-content: center;
 
@@ -650,10 +645,8 @@ textarea:disabled {
 
 .ask-button:disabled {
   opacity: 0.45;
-
   cursor: not-allowed;
 }
-
 
 /* =========================================================
    LOADING
@@ -677,14 +670,12 @@ textarea:disabled {
   }
 }
 
-
 /* =========================================================
    ERROR
    ========================================================= */
 
 .error-message {
   display: flex;
-
   gap: 12px;
 
   padding: 16px;
@@ -708,7 +699,6 @@ textarea:disabled {
   border-radius: 50%;
 
   background: rgba(239, 68, 68, 0.2);
-
   color: #ef4444;
 
   font-size: 13px;
@@ -717,7 +707,6 @@ textarea:disabled {
 
 .error-message strong {
   color: #ef4444;
-
   font-size: 14px;
 }
 
@@ -729,7 +718,6 @@ textarea:disabled {
   font-size: 13px;
   line-height: 1.5;
 }
-
 
 /* =========================================================
    FOOTER
@@ -751,7 +739,6 @@ textarea:disabled {
   font-size: 12px;
 }
 
-
 /* =========================================================
    RESPONSIVE - TABLET / MOBILE
    ========================================================= */
@@ -759,11 +746,9 @@ textarea:disabled {
 @media (max-width: 768px) {
   .app-layout {
     grid-template-columns: 1fr;
-
     padding: 16px;
   }
 }
-
 
 /* =========================================================
    RESPONSIVE - MOBILE
@@ -772,7 +757,6 @@ textarea:disabled {
 @media (max-width: 650px) {
   .header-content {
     width: calc(100% - 28px);
-
     padding: 22px 0;
   }
 
@@ -786,7 +770,6 @@ textarea:disabled {
 
   .container {
     width: calc(100% - 28px);
-
     margin: 25px auto;
   }
 
@@ -800,13 +783,11 @@ textarea:disabled {
 
   .selection-info {
     width: 100%;
-
     justify-content: space-between;
   }
 
   .question-footer {
     flex-direction: column;
-
     align-items: stretch;
   }
 
@@ -815,7 +796,6 @@ textarea:disabled {
   }
 }
 
-
 /* =========================================================
    VERY SMALL SCREENS
    ========================================================= */
@@ -823,7 +803,6 @@ textarea:disabled {
 @media (max-width: 520px) {
   .header-content {
     width: calc(100% - 20px);
-
     gap: 10px;
   }
 
@@ -850,17 +829,14 @@ textarea:disabled {
 
   .appearance-toggle-button {
     padding: 7px 9px;
-
     font-size: 11px;
   }
 
   .appearance-dropdown-menu {
     right: -4px;
-
     width: min(280px, calc(100vw - 24px));
   }
 }
-
 
 /* =========================================================
    FOCUS ACCESSIBILITY
@@ -871,10 +847,8 @@ input:focus-visible,
 textarea:focus-visible,
 label:focus-visible {
   outline: 2px solid var(--accent);
-
   outline-offset: 2px;
 }
-
 
 /* =========================================================
    SHARED ANIMATION
@@ -915,6 +889,7 @@ label:focus-visible {
 
 .visualization-dialog {
   width: min(1500px, 96vw);
+  height: min(900px, 94vh);
   max-height: 94vh;
 
   display: flex;
@@ -1001,21 +976,31 @@ label:focus-visible {
   color: var(--text);
 }
 
+/*
+   IMPORTANT:
+   This content wrapper must participate in the
+   visualization height chain.
+*/
+
 .visualization-dialog-content {
+  flex: 1;
   min-height: 0;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
 
   padding: 18px;
-
-  scrollbar-width: thin;
 }
 
 .visualization-dialog-content .embedding-space {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+
   margin: 0;
 }
-
 
 /* =========================================================
    DOCUMENT VISUALIZATION BUTTON
@@ -1023,6 +1008,7 @@ label:focus-visible {
 
 .documents-header-actions {
   display: flex;
+
   align-items: center;
   justify-content: flex-end;
 
@@ -1033,6 +1019,7 @@ label:focus-visible {
 
 .visualize-documents-button {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
@@ -1074,7 +1061,6 @@ label:focus-visible {
   cursor: not-allowed;
 }
 
-
 /* =========================================================
    VISUALIZATION ANIMATIONS
    ========================================================= */
@@ -1101,7 +1087,6 @@ label:focus-visible {
   }
 }
 
-
 /* =========================================================
    VISUALIZATION RESPONSIVE
    ========================================================= */
@@ -1113,7 +1098,9 @@ label:focus-visible {
 
   .visualization-dialog {
     width: 100%;
+    height: min(900px, 96vh);
     max-height: 96vh;
+
     border-radius: 12px;
   }
 
@@ -1137,6 +1124,7 @@ label:focus-visible {
     max-height: 100vh;
 
     border-radius: 0;
+
     border-left: none;
     border-right: none;
   }
@@ -1155,6 +1143,7 @@ label:focus-visible {
 
   .visualization-dialog-content {
     padding: 8px;
+    overflow: hidden;
   }
 
   .documents-header-actions {
